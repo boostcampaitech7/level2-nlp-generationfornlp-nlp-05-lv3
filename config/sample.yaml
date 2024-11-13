@@ -1,0 +1,19 @@
+data_path: "../contest_baseline_code/data"
+prompt_path: "prompt/base.yaml"
+test_output_dir: "outputs"
+model:
+  name_or_path: "beomi/gemma-ko-2b"
+  chat_template: True
+  output_dir: "baseline_model"
+  lr_scheduler: "cosine"
+  batch_size: 1
+  epochs: 3
+  learning_rate: 2e-5
+  weight_decay: 0.01
+peft:
+  r: 6
+  lora_alpha: 8
+  lora_dropout: 0.05
+  target_modules: ["q_proj", "k_proj"]
+  bias: "none"
+  task_type: "CAUSAL_LM"
