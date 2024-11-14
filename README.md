@@ -34,7 +34,8 @@ python main.py --config {config_path} --mode {train/test}
 - **`peft`**: LoraConfig의 옵션들 지정  
 
 ### custom
-- **프롬프트 수정**: [dataset.py](./src/dataset.py)에서 변경 가능  
-  - `PROMPT_NO_QUESTION_PLUS`, `PROMPT_QUESTION_PLUS`, `process` 함수의 `messages`를 함께 수정해주기  
+- **프롬프트 수정**: [prompt.yaml](./prompt)에 만들고 추가
+  - `no_question_plus_5`, `question_plus_5`, `no_question_plus_4`, `question_plus_4` 함께 지정하기
+  - `config.yaml`의 `prompt_path` 지정하기
 - **chat template**: [model.py](./src/model.py)의 line 31 참고  
 - **추가적인 config**: [utils.py](./src/utils.py)에서 변수 추가 및 수정(config.yaml로도 가능하지만, 그 이상의 옵션들을 수정하고 싶을 경우)  
