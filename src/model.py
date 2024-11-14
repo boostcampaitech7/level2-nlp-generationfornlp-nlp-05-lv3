@@ -8,7 +8,7 @@ from tqdm import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
 
-from src.utils import get_peft_config, get_sft_config
+from src.utils import get_peft_config, get_sft_config, get_quant_config
 
 
 class MyModel():
@@ -16,11 +16,14 @@ class MyModel():
         self.config = config
         self.peft_c = config['peft']
         self.model_c = config['model']
+
+        quant_config = get_quant_config(config['quantization'])
         
         self.model = AutoModelForCausalLM.from_pretrained(
             self.model_c['name_or_path'],
             torch_dtype=torch.float32,
             trust_remote_code=True,
+            quantization_config=quant_config
         )
         
         self.tokenizer = AutoTokenizer.from_pretrained(
@@ -70,7 +73,7 @@ class MyModel():
             tokenize_fn,
             remove_columns=list(processed_train.features),
             batched=True,
-            num_proc=4,
+            num_proc=1,
             load_from_cache_file=True,
             desc="Tokenizing"
         )

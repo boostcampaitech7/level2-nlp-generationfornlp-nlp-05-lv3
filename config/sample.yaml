@@ -2,7 +2,7 @@ data_path: "../contest_baseline_code/data"
 prompt_path: "prompt/base.yaml"
 test_output_dir: "outputs"
 model:
-  name_or_path: "beomi/gemma-ko-2b"
+  name_or_path: "Qwen/Qwen2.5-7B-Instruct"
   chat_template: True
   output_dir: "baseline_model"
   lr_scheduler: "cosine"
@@ -17,3 +17,8 @@ peft:
   target_modules: ["q_proj", "k_proj"]
   bias: "none"
   task_type: "CAUSAL_LM"
+quantization:
+  4bit_or_8bit: 4
+  compute_dtype: float16
+  double_quant: True
+  quant_type: nf4
