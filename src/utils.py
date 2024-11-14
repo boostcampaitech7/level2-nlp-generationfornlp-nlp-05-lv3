@@ -53,10 +53,7 @@ def get_quant_config(config):
         )
     elif config['4bit_or_8bit'] == 8:
         quantization_config = BitsAndBytesConfig(
-            load_in_8bit=True,
-            bnb_8bit_compute_dtype=dtype,
-            bnb_8bit_use_double_quant=config['double_quant'],
-            bnb_8bit_quant_type=config['quant_type']
+            load_in_8bit=True
         )
 
     return quantization_config
