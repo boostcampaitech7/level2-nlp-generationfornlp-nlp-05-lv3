@@ -3,6 +3,7 @@ import pandas as pd
 from tqdm import tqdm
 from ast import literal_eval
 from datasets import Dataset
+from src.utils import make_answers_uniform, print_answer_distribution
 
 
 class MyDataset:
@@ -11,6 +12,18 @@ class MyDataset:
             self.prompt = yaml.full_load(f)
 
     def process(self, dataset_df, mode='train'):
+        if mode == "train":
+            # print answer distribution
+            print()
+            print("*" * 50)
+            print_answer_distribution(dataset_df, "Original")
+            print("*" * 50)
+                    
+            dataset_df = make_answers_uniform(dataset_df)
+
+            print_answer_distribution(dataset_df, "Processed Train")
+            print("*" * 50)        
+        
         records = []
         for _, row in dataset_df.iterrows():
             problems = literal_eval(row['problems'])
