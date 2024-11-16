@@ -9,7 +9,7 @@ from peft import AutoPeftModelForCausalLM
 from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from utils import get_peft_config, get_sft_config, get_quant_config
+from src.utils import get_peft_config, get_sft_config, get_quant_config
 
 
 class MyModel():
