@@ -33,7 +33,7 @@ if __name__ == "__main__":
     model = MyModel(config)
 
     if args.mode == "train":
-        train_df = pd.read_csv(os.path.join(config['data_path'], 'train.csv'))
+        train_df = pd.read_csv(os.path.join(config['data_path'], 'train_uniform_answers.csv'))
         processed_train = dataset.process(train_df, "train")
         model.train(processed_train)
     elif args.mode == "test":

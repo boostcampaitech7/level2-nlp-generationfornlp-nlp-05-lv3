@@ -30,6 +30,7 @@ python main.py --config {config_path} --mode {train/test}
 - **`prompt_path`**: 적용할 prompt의 yaml이 있는 파일 경로(폴더 경로 말고 .yaml의 경로!)  
 - **`test_output_dir`**: `mode`가 `test`일 경우 추론 결과를 저장할 폴더 경로(해당 폴더가 사전에 존재해야 함)  
 - **`model`**: 사용할 모델과 Training Arguments의 옵션들 지정(학습이 완료된 모델을 저장할 경로도 지정 가능)  
+  - `--mode test`일 경우, `model_name_or_path`는 학습이 완료된 checkpoint 경로로 지정
   - 사용할 모델에 따라 chat_template이 필요한 경우 True, 아닐 경우 False로 지정하기  
 - **`peft`**: LoraConfig의 옵션들 지정  
 

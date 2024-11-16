@@ -5,10 +5,11 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from peft import AutoPeftModelForCausalLM
 from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from src.utils import get_peft_config, get_sft_config, get_quant_config
+from utils import get_peft_config, get_sft_config, get_quant_config
 
 
 class MyModel():
@@ -16,27 +17,6 @@ class MyModel():
         self.config = config
         self.peft_c = config['peft']
         self.model_c = config['model']
-
-        quant_config = get_quant_config(config['quantization'])
-        
-        self.model = AutoModelForCausalLM.from_pretrained(
-            self.model_c['name_or_path'],
-            torch_dtype=torch.float32,
-            trust_remote_code=True,
-            quantization_config=quant_config
-        )
-        
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            self.model_c['name_or_path'],
-            trust_remote_code=True,
-        )
-        # gemma-ko-2b에 chat template 직접 지정
-        if self.model_c["chat_template"]:
-            self.tokenizer.chat_template = "{% if messages[0]['role'] == 'system' %}{% set system_message = messages[0]['content'] %}{% endif %}{% if system_message is defined %}{{ system_message }}{% endif %}{% for message in messages %}{% set content = message['content'] %}{% if message['role'] == 'user' %}{{ '<start_of_turn>user\n' + content + '<end_of_turn>\n<start_of_turn>model\n' }}{% elif message['role'] == 'assistant' %}{{ content + '<end_of_turn>\n' }}{% endif %}{% endfor %}"
-        # pad token 설정
-        self.tokenizer.pad_token = self.tokenizer.eos_token
-        self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
-        self.tokenizer.padding_side = 'right'
 
         # metric 로드
         self.acc_metric = evaluate.load("accuracy")
@@ -46,17 +26,19 @@ class MyModel():
         self.pred_choices_map = {0: "1", 1: "2", 2: "3", 3: "4", 4: "5"}
     
     def tokenize(self, processed_train):
+        tokenizer = self.tokenizer
+
         def tokenize_fn(element):
             output_texts = []
             for i in range(len(element["messages"])):
                 output_texts.append(
-                    self.tokenizer.apply_chat_template(
+                    tokenizer.apply_chat_template(
                         element["messages"][i],
                         tokenize=False,
                     )
                 )
 
-            outputs = self.tokenizer(
+            outputs = tokenizer(
                 output_texts,
                 truncation=False,
                 padding=False,
@@ -73,7 +55,7 @@ class MyModel():
             tokenize_fn,
             remove_columns=list(processed_train.features),
             batched=True,
-            num_proc=1,
+            num_proc=4,
             load_from_cache_file=True,
             desc="Tokenizing"
         )
@@ -88,6 +70,29 @@ class MyModel():
         self.eval_dataset = tokenized["test"]
 
     def train(self, processed_train):
+        quant_config = get_quant_config(self.config['quantization'])
+        
+        self.model = AutoModelForCausalLM.from_pretrained(
+            self.model_c['name_or_path'],
+            torch_dtype=torch.float16,
+            trust_remote_code=True,
+            quantization_config=quant_config,
+            device_map="auto"
+        )
+
+        self.tokenizer = AutoTokenizer.from_pretrained(
+            self.model_c['name_or_path'],
+            trust_remote_code=True,
+        )
+
+        if self.model_c["chat_template"]:
+            self.tokenizer.chat_template = "{% if messages[0]['role'] == 'system' %}{% set system_message = messages[0]['content'] %}{% endif %}{% if system_message is defined %}{{ system_message }}{% endif %}{% for message in messages %}{% set content = message['content'] %}{% if message['role'] == 'user' %}{{ '<start_of_turn>user\n' + content + '<end_of_turn>\n<start_of_turn>model\n' }}{% elif message['role'] == 'assistant' %}{{ content + '<end_of_turn>\n' }}{% endif %}{% endfor %}"
+        
+        # pad token 설정
+        self.tokenizer.pad_token = self.tokenizer.eos_token
+        self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
+        self.tokenizer.padding_side = 'right'
+
         self.tokenize(processed_train)
 
         response_template = "<start_of_turn>model"
@@ -137,6 +142,17 @@ class MyModel():
         trainer.train()
     
     def inference(self, processed_test, output_dir):
+        self.model = AutoPeftModelForCausalLM.from_pretrained(
+            self.model_c["name_or_path"],
+            trust_remote_code=True,
+            torch_dtype=torch.bfloat16,
+            device_map="auto",
+        )
+        self.tokenizer = AutoTokenizer.from_pretrained(
+            self.model_c["name_or_path"],
+            trust_remote_code=True,
+        )
+
         infer_results = []
 
         self.model.to("cuda")
