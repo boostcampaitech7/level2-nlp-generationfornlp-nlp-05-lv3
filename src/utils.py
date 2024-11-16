@@ -33,7 +33,6 @@ def get_sft_config(config):
         save_total_limit=2,
         save_only_model=True,
         report_to="wandb",
-        load_best_model_at_end=True,
     )
 
     return sft_config
