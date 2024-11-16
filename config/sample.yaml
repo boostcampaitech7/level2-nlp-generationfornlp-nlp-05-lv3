@@ -5,6 +5,7 @@ model:
   name_or_path: "Qwen/Qwen2.5-7B-Instruct"
   chat_template: True
   output_dir: "models"
+  torch_dtype: float16
   lr_scheduler: "cosine"
   batch_size: 1
   epochs: 3

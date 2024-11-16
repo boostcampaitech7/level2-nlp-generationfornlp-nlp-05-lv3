@@ -71,10 +71,15 @@ class MyModel():
 
     def train(self, processed_train):
         quant_config = get_quant_config(self.config['quantization'])
+
+        if self.model_c["torch_dtype"] == "float16":
+            dtype = torch.float16
+        elif self.model_c["torch_dtype"] == "float32":
+            dtype = torch.float32
         
         self.model = AutoModelForCausalLM.from_pretrained(
             self.model_c['name_or_path'],
-            torch_dtype=torch.float16,
+            torch_dtype=dtype,
             trust_remote_code=True,
             quantization_config=quant_config,
             device_map="auto"
