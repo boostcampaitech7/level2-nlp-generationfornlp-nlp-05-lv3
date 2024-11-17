@@ -1,0 +1,41 @@
+name: '이슈 생성'
+description: 'Github Issue에서 입력 시 Jira로 연동'
+labels: [feat]
+title: '이슈 이름'
+body:
+  - type: input
+    id: parentKey
+    attributes:
+      label: '🎟️ 상위 작업 (Ticket Number)'
+      description: '상위 작업의 Ticket Number'
+      placeholder: 'GENNLP-00'
+    validations:
+      required: true
+
+  - type: input
+    id: branch
+    attributes:
+      label: '🌳 브랜치명 (Branch)'
+      description: '브랜치 이름 (영어로 작성)'
+    validations:
+      required: true
+      
+  - type: input
+    id: description
+    attributes:
+      label: '📝 상세 내용(Description)'
+      description: '이슈에 대한 설명'
+
+    validations:
+      required: true
+
+  - type: textarea
+    id: tasks
+    attributes:
+      label: '✅ 체크리스트(Tasks)'
+      description: '이슈에 대해 필요한 작업'
+      value: |
+        - [ ] Task1
+        - [ ] Task2
+    validations:
+      required: true
