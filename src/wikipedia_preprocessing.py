@@ -74,11 +74,11 @@ class WikipediaPreprocessing:
         return df
 
     # context가 100글자 미만인 문서 제거
-    def filter_short_contexts(self, df, min_length=100):
+    def filter_short_contexts(self, df, min_length=50):
         initial_count = len(df)
         df['context_len'] = df['context'].str.len()
         df = df[df['context_len'] >= min_length]
-        logging.info(f"100글자 미만 문서 제거: {initial_count - len(df)}건")
+        logging.info(f"{min_length}글자 미만 문서 제거: {initial_count - len(df)}건")
         return df.drop(columns='context_len')
 
     # 중복 context 제거
