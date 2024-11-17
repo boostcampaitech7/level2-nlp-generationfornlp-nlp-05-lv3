@@ -23,7 +23,7 @@ body:
   - type: input
     id: description
     attributes:
-      label: '📝 상세 내용(Description)'
+      label: '📝 상세 내용 (Description)'
       description: '이슈에 대한 설명'
 
     validations:
@@ -32,7 +32,7 @@ body:
   - type: textarea
     id: tasks
     attributes:
-      label: '✅ 체크리스트(Tasks)'
+      label: '✅ 체크리스트 (Tasks)'
       description: '이슈에 대해 필요한 작업'
       value: |
         - [ ] Task1
