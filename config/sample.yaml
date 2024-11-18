@@ -9,7 +9,7 @@ model:
   torch_dtype: float16
   lr_scheduler: cosine
   batch_size: 1
-  epochs: 1
+  epochs: 3
   learning_rate: 2e-5
   weight_decay: 0.01
 peft:

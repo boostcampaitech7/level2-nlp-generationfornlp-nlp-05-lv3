@@ -36,7 +36,7 @@ def get_sft_config(config):
         eval_strategy="epoch",
         save_total_limit=2,
         save_only_model=True,
-        report_to="none",
+        report_to="wandb",
     )
 
     return sft_config
