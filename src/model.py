@@ -25,7 +25,7 @@ class MyModel():
         self.int_output_map = {"1": 0, "2": 1, "3": 2, "4": 3, "5": 4}
         self.pred_choices_map = {0: "1", 1: "2", 2: "3", 3: "4", 4: "5"}
     
-    def tokenize(self, processed_train):
+    def tokenize(self, processed):
         tokenizer = self.tokenizer
 
         def tokenize_fn(element):
@@ -51,9 +51,9 @@ class MyModel():
                 "attention_mask": outputs["attention_mask"],
             }
 
-        tokenized = processed_train.map(
+        tokenized = processed.map(
             tokenize_fn,
-            remove_columns=list(processed_train.features),
+            remove_columns=list(processed.features),
             batched=True,
             num_proc=4,
             load_from_cache_file=True,
@@ -64,12 +64,13 @@ class MyModel():
         # *힌트: 1024보다 길이가 더 긴 데이터를 포함하면 더 높은 점수를 달성할 수 있을 것 같습니다!
         tokenized = tokenized.filter(lambda x: len(x["input_ids"]) <= 1024)
         # validation 데이터셋 고정할 수도 있을 것
-        tokenized = tokenized.train_test_split(test_size=0.1, seed=42)
+        # tokenized = tokenized.train_test_split(test_size=0.1, seed=42)
 
-        self.train_dataset = tokenized["train"]
-        self.eval_dataset = tokenized["test"]
+        # self.train_dataset = tokenized["train"]
+        # self.eval_dataset = tokenized["test"]
+        return tokenized
 
-    def train(self, processed_train):
+    def train(self, processed_train, processed_valid):
         quant_config = get_quant_config(self.config['quantization'])
 
         if self.model_c["torch_dtype"] == "float16":
@@ -78,7 +79,7 @@ class MyModel():
             dtype = torch.float32
         
         self.model = AutoModelForCausalLM.from_pretrained(
-            self.model_c['name_or_path'],
+            self.model_c['train_name_or_path'],
             torch_dtype=dtype,
             trust_remote_code=True,
             quantization_config=quant_config,
@@ -86,7 +87,7 @@ class MyModel():
         )
 
         self.tokenizer = AutoTokenizer.from_pretrained(
-            self.model_c['name_or_path'],
+            self.model_c['train_name_or_path'],
             trust_remote_code=True,
         )
 
@@ -98,7 +99,8 @@ class MyModel():
         self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
         self.tokenizer.padding_side = 'right'
 
-        self.tokenize(processed_train)
+        self.train_dataset = self.tokenize(processed_train)
+        self.valid_dataset = self.tokenize(processed_valid)
 
         response_template = "<start_of_turn>model"
         data_collator = DataCollatorForCompletionOnlyLM(
@@ -135,7 +137,7 @@ class MyModel():
         trainer = SFTTrainer(
             model=self.model,
             train_dataset=self.train_dataset,
-            eval_dataset=self.eval_dataset,
+            eval_dataset=self.valid_dataset,
             data_collator=data_collator,
             tokenizer=self.tokenizer,
             compute_metrics=compute_metrics,
@@ -146,17 +148,18 @@ class MyModel():
 
         trainer.train()
     
-    def inference(self, processed_test, output_dir):
-        self.model = AutoPeftModelForCausalLM.from_pretrained(
-            self.model_c["name_or_path"],
-            trust_remote_code=True,
-            torch_dtype=torch.bfloat16,
-            device_map="auto",
-        )
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            self.model_c["name_or_path"],
-            trust_remote_code=True,
-        )
+    def inference(self, processed_test, mode, output_dir):
+        if self.model == None:
+            self.model = AutoPeftModelForCausalLM.from_pretrained(
+                self.model_c["test_name_or_path"],
+                trust_remote_code=True,
+                torch_dtype=torch.bfloat16,
+                device_map="auto",
+            )
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                self.model_c["test_name_or_path"],
+                trust_remote_code=True,
+            )
 
         infer_results = []
 
@@ -188,6 +191,10 @@ class MyModel():
                 )
 
                 predict_value = self.pred_choices_map[np.argmax(probs, axis=-1)]
-                infer_results.append({"id": _id, "answer": predict_value})
+
+                if mode == "valid":
+                    infer_results.append({"id": _id, "answer": data["label"], "pred": predict_value})
+                elif mode == "test":
+                    infer_results.append({"id": _id, "answer": predict_value})
         
-        pd.DataFrame(infer_results).to_csv(os.path.join(output_dir, "output.csv"), index=False)
+        pd.DataFrame(infer_results).to_csv(os.path.join(output_dir, f"output_{mode}.csv"), index=False)

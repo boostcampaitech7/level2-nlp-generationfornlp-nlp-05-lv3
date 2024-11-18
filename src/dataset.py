@@ -77,7 +77,7 @@ class MyDataset:
                         choices=choices_str
                     )
             
-            if mode == "train":
+            if mode == "train" or mode == "valid":
                 processed.append({
                     "id": row["id"],
                     "messages": [
@@ -98,7 +98,7 @@ class MyDataset:
                     "len_choices": len(row["choices"])
                 })
         
-        if mode == "train":
+        if mode == "train" or "valid":
             processed_dataset = Dataset.from_pandas(pd.DataFrame(processed))
             return processed_dataset
         elif mode == "test":
