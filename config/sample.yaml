@@ -1,14 +1,15 @@
-data_path: "../contest_baseline_code/data"
-prompt_path: "prompt/base.yaml"
-test_output_dir: "outputs"
+data_path: data
+prompt_path: prompt/base.yaml
+test_output_dir: Qwen2.5-7B-Instruct
 model:
-  name_or_path: "Qwen/Qwen2.5-7B-Instruct"
+  train_name_or_path: Qwen/Qwen2.5-7B-Instruct
+  test_name_or_path: Qwen2.5-7B-Instruct/checkpoint-4533
   chat_template: True
-  output_dir: "models"
+  output_dir: Qwen2.5-7B-Instruct
   torch_dtype: float16
-  lr_scheduler: "cosine"
+  lr_scheduler: cosine
   batch_size: 1
-  epochs: 3
+  epochs: 1
   learning_rate: 2e-5
   weight_decay: 0.01
 peft:
@@ -16,8 +17,8 @@ peft:
   lora_alpha: 8
   lora_dropout: 0.05
   target_modules: ["q_proj", "k_proj"]
-  bias: "none"
-  task_type: "CAUSAL_LM"
+  bias: none
+  task_type: CAUSAL_LM
 quantization:
   4bit_or_8bit: 4
   compute_dtype: float16
