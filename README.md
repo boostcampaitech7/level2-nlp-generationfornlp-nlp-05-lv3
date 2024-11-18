@@ -26,7 +26,7 @@ python main.py --config {config_path} --mode {train/valid/test}
   - train: train.csv로 모델 학습 → 학습이 완료된 모델로 valid.csv에 대한 추론을 이어서 수행  
   - valid: 학습이 완료된 모델(`test_name_or_path`)로 valid.csv에 대한 추론 수행  
   - test: 학습이 완료된 모델(`test_name_or_path`)로 test.csv에 대한 추론 수행  
-- inference
+- **inference 할 때 참고사항**  
   - valid.csv 추론 후 모델 저장 경로에 output_valid.csv 생성, `columns=[id, answer, pred]`(`answer`은 ground_truth)  
   - test.csv 추론 후 `test_output_dir`에 output_test.csv 생성, `columns=[id, answer]`  
   - output_valid.csv의 `pred`와 output_test.csv의 `answer`이 모델이 추론한 결과임  
@@ -46,5 +46,5 @@ python main.py --config {config_path} --mode {train/valid/test}
 - **프롬프트 수정**: [prompt.yaml](./prompt)에 만들고 추가
   - `no_question_plus_5`, `question_plus_5`, `no_question_plus_4`, `question_plus_4` 함께 지정하기
   - `config.yaml`의 `prompt_path` 지정하기
-- **chat template**: [model.py](./src/model.py)의 line 88 참고  
+- **chat template**: [model.py](./src/model.py)의 line 94 참고  
 - **추가적인 config**: [utils.py](./src/utils.py)에서 변수 추가 및 수정(config.yaml로도 가능하지만, 그 이상의 옵션들을 수정하고 싶을 경우)  
