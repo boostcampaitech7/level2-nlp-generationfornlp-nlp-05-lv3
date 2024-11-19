@@ -107,7 +107,7 @@ class KoreanHistoryBookCrawling:
         total_df = pd.DataFrame()
         for idx, url in enumerate(tqdm(self.links)):
             soup = self.fetch_page(url)
-            if section_name != "":
+            if section_name == "":
                 section_name = self.extract_section_name(url)
             df = self.crawl_content(soup, section_name)
             total_df = pd.concat([total_df, df], ignore_index=True)
