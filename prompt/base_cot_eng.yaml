@@ -1,0 +1,6 @@
+no_question_plus_5: "Paragraph:\n{paragraph}\n\nQuestion:\n{question}\n\nChoices:\n{choices}\n\nChoice one in 5 choices.\nLet's think step by step.\nAnswer:"
+question_plus_5: "Paragraph:\n{paragraph}\n\nQuestion:\n{question}\n\nMore info:\n{question_plus}\n\nChoices:\n{choices}\n\nChoice one in 5 choices.\nLet's think step by step.\nAnswer:"
+# no_question_plus_4: "Paragraph:\n{paragraph}\n\nQuestion:\n{question}\n\nChoices:\n{choices}\n\nChoice one in 5 choices.\nLet's think step by step.\nAnswer:"
+# question_plus_4: "Paragraph:\n{paragraph}\n\nQuestion:\n{question}\n\nMore info:\n{question_plus}\n\nChoices:\n{choices}\n\nChoice one in 5 choices.\nLet's think step by step.\nAnswer:"
+no_question_plus_4: "Paragraph:\n{paragraph}\n\nQuestion:\n{question}\n\nChoices:\n{choices}\n\nChoice one in 4 choices.\nLet's think step by step.\nAnswer:"
+question_plus_4: "Paragraph:\n{paragraph}\n\nQuestion:\n{question}\n\nMore info:\n{question_plus}\n\nChoices:\n{choices}\n\nChoice one in 4 choices.\nLet's think step by step.\nAnswer:"
