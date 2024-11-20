@@ -2,7 +2,7 @@ data_path: "../contest_baseline_code/data"
 prompt_path: "prompt/base_cot_eng.yaml"
 test_output_dir: "outputs"
 model:
-  name_or_path: "Qwen/Qwen2.5-7B-Instruct"
+  name_or_path: "Qwen2.5-7B-Instruct-2/checkpoint-5319"
   chat_template: True
   output_dir: "Qwen2.5-7B-Instruct-2"
   torch_dtype: float16

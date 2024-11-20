@@ -78,11 +78,19 @@ class MyDataset:
                     )
             
             # PROMPT 시스템 메시지 수정
+#            system_message = {
+#                "role": "system",
+#                "content": (
+#                    "시험 문제를 푸는 똑똑한 학생으로서 다음 문제의 답을 구하세요.\n"
+#                    f"지문을 읽고, 질문에 대한 답을 1부터 {len(row['choices'])}까지의 선택지 중에 한 개만 골라서 대답해야 합니다."
+#                )
+#            }
+
             system_message = {
                 "role": "system",
                 "content": (
-                    "시험 문제를 푸는 똑똑한 학생으로서 다음 문제의 답을 구하세요.\n"
-                    f"지문을 읽고, 질문에 대한 답을 1부터 {len(row['choices'])}까지의 선택지 중에 한 개만 골라서 대답해야 합니다."
+                    "As a smart student answer the given question.\n"
+                    f"Read paragraph, and select only one answer between {len(row['choices'])} choices."
                 )
             }
 
