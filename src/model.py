@@ -88,7 +88,7 @@ class MyModel():
                 trust_remote_code=True,
             )
         
-        # gemma-ko-2b에 chat template 직접 지정
+        # chat template 직접 지정
         if self.model_c["chat_template"]:
             self.tokenizer.chat_template = (
                 "{% if messages[0]['role'] == 'system' %}"

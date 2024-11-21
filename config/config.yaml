@@ -1,6 +1,6 @@
 model:
   train:
-    train_model_name: "unsloth/Llama-3.2-1B-Instruct-bnb-4bit" # 학습할 모델 이름
+    train_model_name: "unsloth/Qwen2.5-7B-Instruct-bnb-4bit" # 학습할 모델 이름
     train_csv_path: "data/raw/train.csv" # train csv 파일 경로
     train_checkpoint_path: "checkpoints/(experiment_description)" # 학습한 체크포인트 저장 경로
   test:
@@ -8,7 +8,7 @@ model:
     test_csv_path: "data/raw/test.csv" # test csv 파일 경로
     test_output_csv_path: "data/outputs/(experiment_description).csv" # 리더보드 제출용 csv 파일 경로
 
-  prompt_path: "prompt/base.yaml" # 프롬프트 파일 경로
+  prompt_name: "ATTACK_PROMPT"
   uniform_answer_distribution: False # True: 정답 분포 균등화, False: train 데이터의 정답 분포 그대로 사용
   train_valid_split: True # True: train 0.9, valid 0.1 스플릿, False: valid로 나누지 않고 train만 사용
 
