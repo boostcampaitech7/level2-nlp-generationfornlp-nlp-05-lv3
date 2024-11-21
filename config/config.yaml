@@ -1,0 +1,46 @@
+model:
+  train:
+    train_model_name: "unsloth/Llama-3.2-1B-Instruct-bnb-4bit" # 학습할 모델 이름
+    train_csv_path: "data/raw/train.csv" # train csv 파일 경로
+    train_checkpoint_path: "checkpoints/(experiment_description)" # 학습한 체크포인트 저장 경로
+  test:
+    test_checkpoint_path: "checkpoints/(experiment_description)/checkpoint-18" # 추론할 체크포인트 경로
+    test_csv_path: "data/raw/test.csv" # test csv 파일 경로
+    test_output_csv_path: "data/outputs/(experiment_description).csv" # 리더보드 제출용 csv 파일 경로
+
+  prompt_path: "prompt/base.yaml" # 프롬프트 파일 경로
+  uniform_answer_distribution: False # True: 정답 분포 균등화, False: train 데이터의 정답 분포 그대로 사용
+  train_valid_split: True # True: train 0.9, valid 0.1 스플릿, False: valid로 나누지 않고 train만 사용
+
+  max_seq_length: 2048 # 입력 토큰 최대 길이
+  torch_dtype: float16
+  load_in_4bit: True
+  chat_template: True
+
+sft:
+  lr_scheduler: "cosine"
+  batch_size: 2
+  epochs: 2
+  learning_rate: 2e-4
+  optim: "adamw_8bit"
+  warmup_ratio: 0.1
+  weight_decay: 0.01
+  gradient_accumulation_steps: 16
+
+peft:
+  r: 64
+  lora_alpha: 16
+  lora_dropout: 0.1
+  target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj",]
+  bias: "none"
+  use_gradient_checkpointing: "unsloth"
+  random_state: 42
+  use_rslora: True
+  loftq_config: null
+  # task_type: "CAUSAL_LM"
+
+# quantization:
+#   4bit_or_8bit: 4
+#   compute_dtype: float16
+#   double_quant: True
+#   quant_type: nf4

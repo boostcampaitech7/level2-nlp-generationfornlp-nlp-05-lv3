@@ -7,62 +7,69 @@ import ast
 import random
 from collections import Counter
 
-def get_peft_config(config):
-    config = LoraConfig(
-        r=config['r'],
-        lora_alpha=config['lora_alpha'],
-        lora_dropout=config['lora_dropout'],
-        target_modules=config['target_modules'],
-        bias=config['bias'],
-        task_type=config['task_type']
-    )
+# def get_peft_config(config):
+#     config = LoraConfig(
+#         r=config['r'],
+#         lora_alpha=config['lora_alpha'],
+#         lora_dropout=config['lora_dropout'],
+#         target_modules=config['target_modules'],
+#         bias=config['bias'],
+#         task_type=config['task_type']
+#     )
 
-    return config
+#     return config
 
-def get_sft_config(config):
+def get_sft_config(config, do_eval=False):
     sft_config = SFTConfig(
         do_train=True,
-        do_eval=True,
-        lr_scheduler_type=config['lr_scheduler'],
-        max_seq_length=1024,
-        output_dir=config['output_dir'],
-        per_device_train_batch_size=int(config['batch_size']),
-        per_device_eval_batch_size=int(config['batch_size']),
-        num_train_epochs=int(config['epochs']),
-        learning_rate=float(config['learning_rate']),
-        weight_decay=float(config['weight_decay']),
+        do_eval=do_eval,
+        lr_scheduler_type=config['sft']['lr_scheduler'],
+        max_seq_length=config['model']['max_seq_length'],
+        output_dir=config['model']['train']['train_checkpoint_path'],
+        per_device_train_batch_size=int(config['sft']['batch_size']),
+        per_device_eval_batch_size=int(config['sft']['batch_size']),
+        num_train_epochs=int(config['sft']['epochs']),
+        learning_rate=float(config['sft']['learning_rate']),
+        # warmup_ratio=float(config['sft']['warmup_ratio']),
+        optim=config['sft']['optim'],
+        weight_decay=float(config['sft']['weight_decay']),
         logging_steps=500,
         save_strategy="epoch",
-        eval_strategy="epoch",
+        eval_strategy="no",
         save_total_limit=2,
         save_only_model=True,
         report_to="wandb",
+        #gradient_accumulation_steps=config['sft']['gradient_accumulation_steps'],
     )
+    if do_eval:
+        sft_config.eval_strategy = "epoch"
+    else:
+        sft_config.eval_strategy = "no"
 
     return sft_config
 
-def get_quant_config(config):
-    if config['compute_dtype'] == "float16":
-        dtype = torch.float16
-    elif config['compute_dtype'] == "float32":
-        dtype = torch.float32
+# def get_quant_config(config):
+#     if config['compute_dtype'] == "float16":
+#         dtype = torch.float16
+#     elif config['compute_dtype'] == "float32":
+#         dtype = torch.float32
 
-    if config['4bit_or_8bit'] == 4:
-        quantization_config = BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_compute_dtype=dtype,
-            bnb_4bit_use_double_quant=config['double_quant'],
-            bnb_4bit_quant_type=config['quant_type']
-        )
-    elif config['4bit_or_8bit'] == 8:
-        quantization_config = BitsAndBytesConfig(
-            load_in_8bit=True,
-            bnb_8bit_compute_dtype=dtype,
-            bnb_8bit_use_double_quant=config['double_quant'],
-            bnb_8bit_quant_type=config['quant_type']
-        )
+#     if config['4bit_or_8bit'] == 4:
+#         quantization_config = BitsAndBytesConfig(
+#             load_in_4bit=True,
+#             bnb_4bit_compute_dtype=dtype,
+#             bnb_4bit_use_double_quant=config['double_quant'],
+#             bnb_4bit_quant_type=config['quant_type']
+#         )
+#     elif config['4bit_or_8bit'] == 8:
+#         quantization_config = BitsAndBytesConfig(
+#             load_in_8bit=True,
+#             bnb_8bit_compute_dtype=dtype,
+#             bnb_8bit_use_double_quant=config['double_quant'],
+#             bnb_8bit_quant_type=config['quant_type']
+#         )
 
-    return quantization_config
+#     return quantization_config
 
 
 def make_answers_uniform(dataframe, seed=42):

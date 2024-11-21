@@ -2,19 +2,29 @@
 
 ### 폴더 구조
 ```bash
-.
-|-- README.md
-|-- config
-|   `-- sample.yaml
-|-- outputs
-|-- prompt
-|   `-- base.yaml
-|-- main.py
-|-- outputs # test prediction outputs.csv
-`-- src
-    |-- dataset.py
-    |-- model.py
-    `-- utils.py
+level2-nlp-generationfornlp-nlp-05-lv3/  
+├── .git/  
+├── .github/  
+├── checkpoints/                                # 학습된 모델 체크포인트 저장 폴더  
+│   ├── (experiment_name)/              # 실험 이름  
+│   │   ├── checkpoint-1111             # 모델 체크포인트  
+│   │   └── checkpoint-2222  
+│   └── .gitkeep  
+├── config/  
+│   └── config.yaml                           # 모든 설정 관리 파일  
+├── notebooks/  
+│   └── eda.ipynb  
+├── prompt/  
+│   ├── AI_provocation_prompt.yaml # 프롬프트 저장 파일(AI 자극 프롬프트)  
+│   ├── base.yaml                                # 프롬프트 저장 파일(베이스라인 코드 프롬프트)  
+├── src/  
+│   ├── dataset.py  
+│   ├── model.py  
+│   ├── utils.py  
+│   └── wandb/  
+├── .gitignore  
+├── main.py  
+└── README.md  
 ```
 
 ### 사용법
@@ -25,18 +35,20 @@ python main.py --config {config_path} --mode {train/test}
 - **`mode`**: train, test 중 선택  
 
 ### config.yaml  
-[여기](./config/sample.yaml)에서 확인, sample은 기존 baseline과 동일한 설정  
-- **`data_path`**: train.csv, test.csv가 있는 폴더의 경로  
-- **`prompt_path`**: 적용할 prompt의 yaml이 있는 파일 경로(폴더 경로 말고 .yaml의 경로!)  
-- **`test_output_dir`**: `mode`가 `test`일 경우 추론 결과를 저장할 폴더 경로(해당 폴더가 사전에 존재해야 함)  
-- **`model`**: 사용할 모델과 Training Arguments의 옵션들 지정(학습이 완료된 모델을 저장할 경로도 지정 가능)  
-  - `--mode test`일 경우, `model_name_or_path`는 학습이 완료된 checkpoint 경로로 지정  
-  - 사용할 모델에 따라 chat_template이 필요한 경우 True, 아닐 경우 False로 지정하기  
-- **`peft`**: LoraConfig의 옵션들 지정  
+[여기](./config/config.yaml)에서 확인
+- **`train_model_name`**: 학습할 모델 이름(Hugging Face)
+- **`train_csv_path`**: train csv 파일 경로
+- **`train_checkpoint_path`**: 학습한 체크포인트 저장 경로 
 
-### custom
-- **프롬프트 수정**: [prompt.yaml](./prompt)에 만들고 추가
-  - `no_question_plus_5`, `question_plus_5`, `no_question_plus_4`, `question_plus_4` 함께 지정하기
-  - `config.yaml`의 `prompt_path` 지정하기
-- **chat template**: [model.py](./src/model.py)의 line 88 참고  
-- **추가적인 config**: [utils.py](./src/utils.py)에서 변수 추가 및 수정(config.yaml로도 가능하지만, 그 이상의 옵션들을 수정하고 싶을 경우)  
+- **`test_checkpoint_path`**: 추론할 체크포인트 경로  
+- **`test_csv_path`**: test csv 파일 경로
+- **`test_output_csv_path`**: 리더보드 제출용 csv 파일 경로
+
+- **`prompt_path`**: 프롬프트 파일 경로
+- **`uniform_answer_distribution`**: True: 정답 분포 균등화, False: train 데이터의 정답 분포 그대로 사용
+- **`train_valid_split`**: True: train 0.9, valid 0.1 스플릿, False: valid로 나누지 않고 train만 사용
+
+- **`max_seq_length`**: 입력 토큰 최대 길이
+
+- **`sft`**: train.csv, test.csv가 있는 폴더의 경로  
+- **`peft`**: train.csv, test.csv가 있는 폴더의 경로  
