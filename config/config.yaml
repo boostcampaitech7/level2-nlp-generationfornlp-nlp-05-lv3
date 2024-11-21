@@ -2,15 +2,15 @@ model:
   train:
     train_model_name: "unsloth/Qwen2.5-7B-Instruct-bnb-4bit" # 학습할 모델 이름
     train_csv_path: "data/raw/train.csv" # train csv 파일 경로
-    train_checkpoint_path: "checkpoints/(experiment_description)" # 학습한 체크포인트 저장 경로
+    train_checkpoint_path: "checkpoints/Qwen_train_vanilla_ATTACK_PROMPT_20241121" # 학습한 체크포인트 저장 경로
   test:
-    test_checkpoint_path: "checkpoints/(experiment_description)/checkpoint-18" # 추론할 체크포인트 경로
+    test_checkpoint_path: "checkpoints/Qwen_train_vanilla_ATTACK_PROMPT_20241121/checkpoint-18" # 추론할 체크포인트 경로
     test_csv_path: "data/raw/test.csv" # test csv 파일 경로
-    test_output_csv_path: "data/outputs/(experiment_description).csv" # 리더보드 제출용 csv 파일 경로
+    test_output_csv_path: "data/outputs/Qwen_train_vanilla_ATTACK_PROMPT_20241121.csv" # 리더보드 제출용 csv 파일 경로
 
   prompt_name: "ATTACK_PROMPT"
-  uniform_answer_distribution: False # True: 정답 분포 균등화, False: train 데이터의 정답 분포 그대로 사용
-  train_valid_split: True # True: train 0.9, valid 0.1 스플릿, False: valid로 나누지 않고 train만 사용
+  uniform_answer_distribution: True # True: 정답 분포 균등화, False: train 데이터의 정답 분포 그대로 사용
+  train_valid_split: False # True: train 0.9, valid 0.1 스플릿, False: valid로 나누지 않고 train만 사용
 
   max_seq_length: 2048 # 입력 토큰 최대 길이
   torch_dtype: float16

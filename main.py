@@ -36,6 +36,7 @@ if __name__ == "__main__":
 
     if args.mode == "train":
         checkpoint_dir = config['model']['train']['train_checkpoint_path']
+        os.makedirs(checkpoint_dir, exist_ok=True)
         shutil.copy(args.config, os.path.join(checkpoint_dir, "config.yaml"))
         train_df = pd.read_csv(os.path.join(base_path, config['model']['train']['train_csv_path']))
         processed_train = dataset.process(train_df, "train")
