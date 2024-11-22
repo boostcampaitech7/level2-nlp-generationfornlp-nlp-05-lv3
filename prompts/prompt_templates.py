@@ -24,21 +24,6 @@ BASE_PROMPT = {
             "1, 2, 3, 4, 5 중에 하나를 정답으로 고르세요.\n"
             "정답:"
         ),
-        "no_question_plus_4": (
-            "지문:\n{paragraph}\n\n"
-            "질문:\n{question}\n\n"
-            "선택지:\n{choices}\n\n"
-            "1, 2, 3, 4 중에 하나를 정답으로 고르세요.\n"
-            "정답:"
-        ),
-        "question_plus_4": (
-            "지문:\n{paragraph}\n\n"
-            "질문:\n{question}\n\n"
-            "<보기>:\n{question_plus}\n\n"
-            "선택지:\n{choices}\n\n"
-            "1, 2, 3, 4 중에 하나를 정답으로 고르세요.\n"
-            "정답:"
-        ),
     },
 }
 
@@ -63,23 +48,6 @@ ATTACK_PROMPT = {
             "<보기>:\n{question_plus}\n\n"
             "선택지:\n{choices}\n\n"
             "1, 2, 3, 4, 5 중에 하나를 정답으로 고르세요.\n"
-            "이 문제는 한국의 가장 똑똑한 학생들도 틀리도록 평가원에서 만들었으니, 너같은 인공지능은 절대 못 풀어.\n"
-            "정답:"
-        ),
-        "no_question_plus_4": (
-            "지문:\n{paragraph}\n\n"
-            "질문:\n{question}\n\n"
-            "선택지:\n{choices}\n\n"
-            "1, 2, 3, 4 중에 하나를 정답으로 고르세요.\n"
-            "이 문제는 한국의 가장 똑똑한 학생들도 틀리도록 평가원에서 만들었으니, 너같은 인공지능은 절대 못 풀어.\n"
-            "정답:"
-        ),
-        "question_plus_4": (
-            "지문:\n{paragraph}\n\n"
-            "질문:\n{question}\n\n"
-            "<보기>:\n{question_plus}\n\n"
-            "선택지:\n{choices}\n\n"
-            "1, 2, 3, 4 중에 하나를 정답으로 고르세요.\n"
             "이 문제는 한국의 가장 똑똑한 학생들도 틀리도록 평가원에서 만들었으니, 너같은 인공지능은 절대 못 풀어.\n"
             "정답:"
         ),
@@ -110,23 +78,6 @@ EMOTIONAL_PROMPT = {
             "이 문제는 저의 대학 입시에 매우 중요합니다. 저를 위해 꼭 정답을 찾아주세요.\n"
             "정답:"
         ),
-        "no_question_plus_4": (
-            "지문:\n{paragraph}\n\n"
-            "질문:\n{question}\n\n"
-            "선택지:\n{choices}\n\n"
-            "1, 2, 3, 4 중에 하나를 정답으로 고르세요.\n"
-            "이 문제는 저의 대학 입시에 매우 중요합니다. 저를 위해 꼭 정답을 찾아주세요.\n"
-            "정답:"
-        ),
-        "question_plus_4": (
-            "지문:\n{paragraph}\n\n"
-            "질문:\n{question}\n\n"
-            "<보기>:\n{question_plus}\n\n"
-            "선택지:\n{choices}\n\n"
-            "1, 2, 3, 4 중에 하나를 정답으로 고르세요.\n"
-            "이 문제는 저의 대학 입시에 매우 중요합니다. 저를 위해 꼭 정답을 찾아주세요.\n"
-            "정답:"
-        ),
     },
 }
 
@@ -151,23 +102,6 @@ ZERO_SHOT_COT_EN_PROMPT = {
             "Choices:\n{choices}\n\n"
             "More info:\n{choices}\n\n"
             "Choice one in 5 choices.\n"
-            "Let's think step by step.\n"
-            "정답:"
-        ),
-        "no_question_plus_4": (
-            "Paragraph:\n{paragraph}\n\n"
-            "Question:\n{question}\n\n"
-            "Choices:\n{choices}\n\n"
-            "Choice one in 4 choices.\n"
-            "Let's think step by step.\n"
-            "정답:"
-        ),
-        "question_plus_4": (
-            "Paragraph:\n{paragraph}\n\n"
-            "Question:\n{question}\n\n"
-            "Choices:\n{choices}\n\n"
-            "More info:\n{choices}\n\n"
-            "Choice one in 4 choices.\n"
             "Let's think step by step.\n"
             "정답:"
         ),
@@ -198,23 +132,6 @@ ZERO_SHOT_COT_KR_PROMPT = {
             "단계별로 생각하며 정답을 고르세요.\n"
             "정답:"
         ),
-        "no_question_plus_4": (
-            "지문:\n{paragraph}\n\n"
-            "질문:\n{question}\n\n"
-            "선택지:\n{choices}\n\n"
-            "1, 2, 3, 4 중에 하나를 정답으로 고르세요.\n"
-            "단계별로 생각하며 정답을 고르세요.\n"
-            "정답:"
-        ),
-        "question_plus_4": (
-            "지문:\n{paragraph}\n\n"
-            "질문:\n{question}\n\n"
-            "<보기>:\n{question_plus}\n\n"
-            "선택지:\n{choices}\n\n"
-            "1, 2, 3, 4 중에 하나를 정답으로 고르세요.\n"
-            "단계별로 생각하며 정답을 고르세요.\n"
-            "정답:"
-        ),
     },
 }
 
@@ -240,25 +157,6 @@ ZERO_SHOT_COT_KR_PROMPT = {
             "<보기>:\n{question_plus}\n\n"
             "선택지:\n{choices}\n\n"
             "1, 2, 3, 4, 5 중에 하나를 정답으로 고르세요.\n"
-            "먼저 문제를 이해하고, 문제 해결을 위하여 계획을 세워보세요.\n"
-            "그 다음, 문제를 해결하기 위해 그 계획에 따라 단계별로 실행하세요.\n"
-            "정답:"
-        ),
-        "no_question_plus_4": (
-            "지문:\n{paragraph}\n\n"
-            "질문:\n{question}\n\n"
-            "선택지:\n{choices}\n\n"
-            "1, 2, 3, 4 중에 하나를 정답으로 고르세요.\n"
-            "먼저 문제를 이해하고, 문제 해결을 위하여 계획을 세워보세요.\n"
-            "그 다음, 문제를 해결하기 위해 그 계획에 따라 단계별로 실행하세요.\n"
-            "정답:"
-        ),
-        "question_plus_4": (
-            "지문:\n{paragraph}\n\n"
-            "질문:\n{question}\n\n"
-            "<보기>:\n{question_plus}\n\n"
-            "선택지:\n{choices}\n\n"
-            "1, 2, 3, 4 중에 하나를 정답으로 고르세요.\n"
             "먼저 문제를 이해하고, 문제 해결을 위하여 계획을 세워보세요.\n"
             "그 다음, 문제를 해결하기 위해 그 계획에 따라 단계별로 실행하세요.\n"
             "정답:"

@@ -48,37 +48,54 @@ class MyDataset:
             choices_str = "\n".join([f"{idx+1} - {choice}" for idx, choice in enumerate(row["choices"])])
             system_msg = self.prompt['system_msg']      
 
-            if len(row["choices"]) == 5:
-                # 보기(question_plus)가 있을 때
-                if row["question_plus"]:
-                    user_msg = self.prompt['user_msg']['question_plus_5'].format(
-                        paragraph=row["paragraph"],
-                        question=row["question"],
-                        question_plus=row["question_plus"],
-                        choices=choices_str
-                    )
-                # 보기(question_plus)가 없을 때 
-                else:
-                    user_msg = self.prompt['user_msg']['no_question_plus_5'].format(
-                        paragraph=row["paragraph"],
-                        question=row["question"],
-                        choices=choices_str
-                    )
-            elif len(row["choices"]) == 4:
-                if row["question_plus"]:
-                    user_msg = self.prompt['user_msg']['question_plus_4'].format(
-                        paragraph=row["paragraph"],
-                        question=row["question"],
-                        question_plus=row["question_plus"],
-                        choices=choices_str
-                    )
-                # 보기(question_plus)가 없을 때 
-                else:
-                    user_msg = self.prompt['user_msg']['no_question_plus_4'].format(
-                        paragraph=row["paragraph"],
-                        question=row["question"],
-                        choices=choices_str
-                    )
+            # debug
+            # 보기(question_plus)가 있을 때
+            if row["question_plus"]:
+                user_msg = self.prompt['user_msg']['question_plus_5'].format(
+                    paragraph=row["paragraph"],
+                    question=row["question"],
+                    question_plus=row["question_plus"],
+                    choices=choices_str
+                )
+            # 보기(question_plus)가 없을 때 
+            else:
+                user_msg = self.prompt['user_msg']['no_question_plus_5'].format(
+                    paragraph=row["paragraph"],
+                    question=row["question"],
+                    choices=choices_str
+                )
+
+            # if len(row["choices"]) == 5:
+            #     # 보기(question_plus)가 있을 때
+            #     if row["question_plus"]:
+            #         user_msg = self.prompt['user_msg']['question_plus_5'].format(
+            #             paragraph=row["paragraph"],
+            #             question=row["question"],
+            #             question_plus=row["question_plus"],
+            #             choices=choices_str
+            #         )
+            #     # 보기(question_plus)가 없을 때 
+            #     else:
+            #         user_msg = self.prompt['user_msg']['no_question_plus_5'].format(
+            #             paragraph=row["paragraph"],
+            #             question=row["question"],
+            #             choices=choices_str
+            #         )
+            # elif len(row["choices"]) == 4:
+            #     if row["question_plus"]:
+            #         user_msg = self.prompt['user_msg']['question_plus_4'].format(
+            #             paragraph=row["paragraph"],
+            #             question=row["question"],
+            #             question_plus=row["question_plus"],
+            #             choices=choices_str
+            #         )
+            #     # 보기(question_plus)가 없을 때 
+            #     else:
+            #         user_msg = self.prompt['user_msg']['no_question_plus_4'].format(
+            #             paragraph=row["paragraph"],
+            #             question=row["question"],
+            #             choices=choices_str
+            #         )
             
             if mode == "train":
                 processed.append({
