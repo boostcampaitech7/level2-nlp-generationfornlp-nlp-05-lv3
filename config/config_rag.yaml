@@ -5,7 +5,7 @@ model:
     train_checkpoint_path: "checkpoints/Qwen_train_code_test_20241122" # 학습한 체크포인트 저장 경로
   test:
     test_checkpoint_path: "itsmenlp/unsloth_qwen_2.5_32B_bnb_4bit_finetuned" # 추론할 체크포인트 경로
-    test_csv_path: "data/raw/test.csv" # test csv 파일 경로
+    test_csv_path: "data/test_rag.csv" # retrieve된 test 파일 경로
     test_output_csv_path: "data/outputs/rag_test.csv" # 리더보드 제출용 csv 파일 경로
 
   prompt_name: "RAG_PROMPT"
