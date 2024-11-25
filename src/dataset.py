@@ -246,7 +246,7 @@ class MyDatasetRag:
         print('*'*50)     
                      
         print('Log - Prompt 확인2:')
-        data_sample = processed[512]
+        data_sample = processed[-1]
         print('<System>')
         print(data_sample["messages"][0]["content"])
         print('<User>')
