@@ -4,6 +4,7 @@
 # zero-shot-CoT-영어 프롬프팅 : ZERO_SHOT_COT_EN_PROMPT
 # zero-shot-CoT-한국어 프롬프팅 : ZERO_SHOT_COT_KR_PROMPT
 # Plan-and-Solve 프롬프팅 :ZERO_SHOT_COT_KR_PROMPT
+# RAG 프롬프팅: RAG_PROMPT
 
 #기본 프롬프팅
 BASE_PROMPT = {
@@ -159,6 +160,30 @@ ZERO_SHOT_COT_KR_PROMPT = {
             "1, 2, 3, 4, 5 중에 하나를 정답으로 고르세요.\n"
             "먼저 문제를 이해하고, 문제 해결을 위하여 계획을 세워보세요.\n"
             "그 다음, 문제를 해결하기 위해 그 계획에 따라 단계별로 실행하세요.\n"
+            "정답:"
+        ),
+    },
+}
+
+#RAG 프롬프팅
+RAG_PROMPT = {
+    "system_msg": "지문을 읽고 질문의 답을 구하세요.",
+    "user_msg": {
+        "no_question_plus_5": (
+            "지문:\n{paragraph}\n\n"
+            "참고:\n{reference}\n\n"
+            "질문:\n{question}\n\n"
+            "선택지:\n{choices}\n\n"
+            "1, 2, 3, 4, 5 중에 하나를 정답으로 고르세요.\n"
+            "정답:"
+        ),
+        "question_plus_5": (
+            "지문:\n{paragraph}\n\n"
+            "참고:\n{reference}\n\n"
+            "질문:\n{question}\n\n"
+            "<보기>:\n{question_plus}\n\n"
+            "선택지:\n{choices}\n\n"
+            "1, 2, 3, 4, 5 중에 하나를 정답으로 고르세요.\n"
             "정답:"
         ),
     },
