@@ -7,11 +7,9 @@ from tqdm import tqdm
 
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
-
-from src.utils import get_sft_config
-from unsloth import FastLanguageModel
+from src.utils import get_Unsloth_Training_Arguments
 from peft import AutoPeftModelForCausalLM, LoraConfig
-
+from unsloth import FastLanguageModel, UnslothTrainer, UnslothTrainingArguments, is_bfloat16_supported
 
 def formatting_prompts_func(example, tokenizer):
     output_texts = []
@@ -56,14 +54,14 @@ class MyModel():
         self.peft_c = config['peft']
         self.model_c = config['model']
 
+        self.model, self.tokenizer = FastLanguageModel.from_pretrained(
+            model_name=config['model']['train']['train_model_name'],
+            max_seq_length=config['model']['max_seq_length'],
+            dtype=None,
+            load_in_4bit=config['model']['load_in_4bit']
+        )
+        
         if mode == "train":
-            self.model, self.tokenizer = FastLanguageModel.from_pretrained(
-                model_name=config['model']['train']['train_model_name'],
-                max_seq_length=config['model']['max_seq_length'],
-                dtype=getattr(torch, config['model']['torch_dtype']),
-                load_in_4bit=config['model']['load_in_4bit']
-            )
-            
             self.model = FastLanguageModel.get_peft_model(
                 self.model,
                 r=self.peft_c['r'],
@@ -77,16 +75,6 @@ class MyModel():
                 loftq_config=self.peft_c['loftq_config'],
             )
 
-        elif mode == "test":
-            self.model = AutoPeftModelForCausalLM.from_pretrained(
-                self.model_c['test']['test_checkpoint_path'],
-                trust_remote_code=True,
-                device_map="auto",
-            )            
-            self.tokenizer = AutoTokenizer.from_pretrained(
-                self.model_c['test']['test_checkpoint_path'],
-                trust_remote_code=True,
-            )
         
         # chat template 직접 지정
         if self.model_c["chat_template"]:
@@ -170,14 +158,15 @@ class MyModel():
         self.tokenizer.padding_side = 'right'
         
         do_eval = self.eval_dataset is not None
-        sft_config = get_sft_config(self.config, do_eval=do_eval)
+        Unsloth_Training_Arguments = get_Unsloth_Training_Arguments(self.config, do_eval=do_eval)
 
         trainer_args = {
             "model": self.model,
             "train_dataset": self.train_dataset,
             "data_collator": data_collator,
             "tokenizer": self.tokenizer,
-            "args": sft_config
+            "dataset_num_proc" : 4,
+            "args": Unsloth_Training_Arguments
         }
         
         if do_eval:
@@ -185,7 +174,7 @@ class MyModel():
             trainer_args["compute_metrics"] = compute_metrics
             trainer_args["preprocess_logits_for_metrics"] = preprocess_logits_for_metrics
 
-        trainer = SFTTrainer(**trainer_args)
+        trainer = UnslothTrainer(**trainer_args)
 
         trainer.train()
     
@@ -214,7 +203,8 @@ class MyModel():
 
                 probs = (
                     torch.nn.functional.softmax(
-                        torch.tensor(target_logit_list, dtype=torch.float32)
+                        torch.tensor(target_logit_list, dtype=torch.float32),
+                        dim=0  # 차원을 명시적으로 설정
                     ).detach().cpu().numpy()
                 )
 

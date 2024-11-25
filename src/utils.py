@@ -6,6 +6,7 @@ import pandas as pd
 import ast
 import random
 from collections import Counter
+from unsloth import FastLanguageModel, UnslothTrainer, UnslothTrainingArguments, is_bfloat16_supported
 
 # def get_peft_config(config):
 #     config = LoraConfig(
@@ -19,8 +20,8 @@ from collections import Counter
 
 #     return config
 
-def get_sft_config(config, do_eval=False):
-    sft_config = SFTConfig(
+def get_Unsloth_Training_Arguments(config, do_eval=False):
+    UnslothTrainingArguments = UnslothTrainingArguments(
         do_train=True,
         do_eval=do_eval,
         lr_scheduler_type=config['sft']['lr_scheduler'],
@@ -30,23 +31,26 @@ def get_sft_config(config, do_eval=False):
         per_device_eval_batch_size=int(config['sft']['batch_size']),
         num_train_epochs=int(config['sft']['epochs']),
         learning_rate=float(config['sft']['learning_rate']),
-        # warmup_ratio=float(config['sft']['warmup_ratio']),
+        embedding_learning_rate =float(config['sft']['embedding_learning_rate']),
+        warmup_ratio=float(config['sft']['warmup_ratio']),
         optim=config['sft']['optim'],
         weight_decay=float(config['sft']['weight_decay']),
-        logging_steps=500,
+        fp16 = not is_bfloat16_supported(),
+        bf16 = is_bfloat16_supported(),
+        logging_steps=1,
         save_strategy="epoch",
         eval_strategy="no",
-        save_total_limit=2,
+        save_total_limit=3,
         save_only_model=True,
         report_to="wandb",
-        #gradient_accumulation_steps=config['sft']['gradient_accumulation_steps'],
+        gradient_accumulation_steps=config['sft']['gradient_accumulation_steps'],
     )
     if do_eval:
-        sft_config.eval_strategy = "epoch"
+        UnslothTrainingArguments.eval_strategy = "epoch"
     else:
-        sft_config.eval_strategy = "no"
+        UnslothTrainingArguments.eval_strategy = "no"
 
-    return sft_config
+    return UnslothTrainingArguments
 
 # def get_quant_config(config):
 #     if config['compute_dtype'] == "float16":
