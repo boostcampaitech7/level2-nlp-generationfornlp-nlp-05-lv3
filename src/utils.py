@@ -19,34 +19,38 @@ from collections import Counter
 
 #     return config
 
-def get_sft_config(config, do_eval=False):
-    sft_config = SFTConfig(
-        do_train=True,
-        do_eval=do_eval,
-        lr_scheduler_type=config['sft']['lr_scheduler'],
-        max_seq_length=config['model']['max_seq_length'],
-        output_dir=config['model']['train']['train_checkpoint_path'],
-        per_device_train_batch_size=int(config['sft']['batch_size']),
-        per_device_eval_batch_size=int(config['sft']['batch_size']),
-        num_train_epochs=int(config['sft']['epochs']),
-        learning_rate=float(config['sft']['learning_rate']),
-        # warmup_ratio=float(config['sft']['warmup_ratio']),
-        optim=config['sft']['optim'],
-        weight_decay=float(config['sft']['weight_decay']),
-        logging_steps=500,
-        save_strategy="epoch",
-        eval_strategy="no",
-        save_total_limit=2,
-        save_only_model=True,
-        report_to="wandb",
-        #gradient_accumulation_steps=config['sft']['gradient_accumulation_steps'],
-    )
-    if do_eval:
-        sft_config.eval_strategy = "epoch"
-    else:
-        sft_config.eval_strategy = "no"
+# def get_sft_config(config, do_eval=False):
+#     sft_config = SFTConfig(
+#         do_train=True,
+#         do_eval=do_eval,
+#         per_device_train_batch_size=int(config['sft']['batch_size']),
+#         per_device_eval_batch_size=int(config['sft']['batch_size']),
+#         #gradient_accumulation_steps=config['sft']['gradient_accumulation_steps'],
+#         # warmup_ratio=float(config['sft']['warmup_ratio']),
+#         num_train_epochs=int(config['sft']['epochs']),
+#         learning_rate=float(config['sft']['learning_rate']),
 
-    return sft_config
+
+
+#         logging_steps=500,
+#         optim=config['sft']['optim'],
+#         weight_decay=float(config['sft']['weight_decay']),
+#         lr_scheduler_type=config['sft']['lr_scheduler'],
+
+#         max_seq_length=config['model']['max_seq_length'],
+#         output_dir=config['model']['train']['train_checkpoint_path'],
+#         save_strategy="epoch",
+#         eval_strategy="no",
+#         save_total_limit=2,
+#         save_only_model=True,
+#         report_to="wandb",
+#     )
+#     if do_eval:
+#         sft_config.eval_strategy = "epoch"
+#     else:
+#         sft_config.eval_strategy = "no"
+
+#     return sft_config
 
 # def get_quant_config(config):
 #     if config['compute_dtype'] == "float16":

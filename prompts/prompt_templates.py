@@ -6,12 +6,13 @@
 # Plan-and-Solve 프롬프팅 :ZERO_SHOT_COT_KR_PROMPT
 # RAG 프롬프팅: RAG_PROMPT
 
-#기본 프롬프팅
-BASE_PROMPT = {
-    "system_msg": "지문을 읽고 질문의 답을 구하세요.",
+#SOTA 프롬프팅, RAG는 코드 안에서 나눔
+SOTA_PROMPT = {
+    "system_msg": "너는 대한민국 수능 전문가입니다. 앞으로 수능 국어, 사회 관련 문제들이 주어질 것입니다. 지문을 읽고 질문의 답을 구하세요.",
     "user_msg": {
         "no_question_plus_5": (
             "지문:\n{paragraph}\n\n"
+            "참고:\n{reference}\n\n"
             "질문:\n{question}\n\n"
             "선택지:\n{choices}\n\n"
             "1, 2, 3, 4, 5 중에 하나를 정답으로 고르세요.\n"
@@ -19,6 +20,31 @@ BASE_PROMPT = {
         ),
         "question_plus_5": (
             "지문:\n{paragraph}\n\n"
+            "참고:\n{reference}\n\n"
+            "질문:\n{question}\n\n"
+            "<보기>:\n{question_plus}\n\n"
+            "선택지:\n{choices}\n\n"
+            "1, 2, 3, 4, 5 중에 하나를 정답으로 고르세요.\n"
+            "정답:"
+        ),
+    },
+}
+
+#기본 프롬프팅
+BASE_PROMPT = {
+    "system_msg": "지문을 읽고 질문의 답을 구하세요.",
+    "user_msg": {
+        "no_question_plus_5": (
+            "지문:\n{paragraph}\n\n"
+            "참고:\n{reference}\n\n"
+            "질문:\n{question}\n\n"
+            "선택지:\n{choices}\n\n"
+            "1, 2, 3, 4, 5 중에 하나를 정답으로 고르세요.\n"
+            "정답:"
+        ),
+        "question_plus_5": (
+            "지문:\n{paragraph}\n\n"
+            "참고:\n{reference}\n\n"
             "질문:\n{question}\n\n"
             "<보기>:\n{question_plus}\n\n"
             "선택지:\n{choices}\n\n"
@@ -37,6 +63,7 @@ ATTACK_PROMPT = {
     "user_msg": {
         "no_question_plus_5": (
             "지문:\n{paragraph}\n\n"
+            "참고:\n{reference}\n\n"
             "질문:\n{question}\n\n"
             "선택지:\n{choices}\n\n"
             "1, 2, 3, 4, 5 중에 하나를 정답으로 고르세요.\n"
@@ -45,6 +72,7 @@ ATTACK_PROMPT = {
         ),
         "question_plus_5": (
             "지문:\n{paragraph}\n\n"
+            "참고:\n{reference}\n\n"
             "질문:\n{question}\n\n"
             "<보기>:\n{question_plus}\n\n"
             "선택지:\n{choices}\n\n"
@@ -64,6 +92,7 @@ EMOTIONAL_PROMPT = {
     "user_msg": {
         "no_question_plus_5": (
             "지문:\n{paragraph}\n\n"
+            "참고:\n{reference}\n\n"
             "질문:\n{question}\n\n"
             "선택지:\n{choices}\n\n"
             "1, 2, 3, 4, 5 중에 하나를 정답으로 고르세요.\n"
@@ -72,6 +101,7 @@ EMOTIONAL_PROMPT = {
         ),
         "question_plus_5": (
             "지문:\n{paragraph}\n\n"
+            "참고:\n{reference}\n\n"
             "질문:\n{question}\n\n"
             "<보기>:\n{question_plus}\n\n"
             "선택지:\n{choices}\n\n"
@@ -82,32 +112,34 @@ EMOTIONAL_PROMPT = {
     },
 }
 
-# zero-shot-CoT-영어 프롬프팅
-ZERO_SHOT_COT_EN_PROMPT = {
-    "system_msg": (
-        "As a smart student answer the given question.\n"
-        "Read paragraph, and select only one answer between choices."
-        ),
-    "user_msg": {
-        "no_question_plus_5": (
-            "Paragraph:\n{paragraph}\n\n"
-            "Question:\n{question}\n\n"
-            "Choices:\n{choices}\n\n"
-            "Choice one in 5 choices.\n"
-            "Let's think step by step.\n"
-            "정답:"
-        ),
-        "question_plus_5": (
-            "Paragraph:\n{paragraph}\n\n"
-            "Question:\n{question}\n\n"
-            "Choices:\n{choices}\n\n"
-            "More info:\n{choices}\n\n"
-            "Choice one in 5 choices.\n"
-            "Let's think step by step.\n"
-            "정답:"
-        ),
-    },
-}
+# zero-shot-CoT-영어 프롬프팅 -> CoT assistant에서 사용하도록 수정해야함
+# ZERO_SHOT_COT_EN_PROMPT = {
+#     "system_msg": (
+#         "As a smart student answer the given question.\n"
+#         "Read paragraph, and select only one answer between choices."
+#         ),
+#     "user_msg": {
+#         "no_question_plus_5": (
+#             "Paragraph:\n{paragraph}\n\n"
+#             "Reference:\n{reference}\n\n"
+#             "Question:\n{question}\n\n"
+#             "Choices:\n{choices}\n\n"
+#             "Choice one in 5 choices.\n"
+#             "Let's think step by step.\n"
+#             "정답:"
+#         ),
+#         "question_plus_5": (
+#             "Paragraph:\n{paragraph}\n\n"
+#             "Reference:\n{reference}\n\n"
+#             "Question:\n{question}\n\n"
+#             "Choices:\n{choices}\n\n"
+#             "More info:\n{choices}\n\n"
+#             "Choice one in 5 choices.\n"
+#             "Let's think step by step.\n"
+#             "정답:"
+#         ),
+#     },
+# }
 
 # zero-shot-CoT-한국어 프롬프팅
 ZERO_SHOT_COT_KR_PROMPT = {
@@ -118,6 +150,7 @@ ZERO_SHOT_COT_KR_PROMPT = {
     "user_msg": {
         "no_question_plus_5": (
             "지문:\n{paragraph}\n\n"
+            "참고:\n{reference}\n\n"
             "질문:\n{question}\n\n"
             "선택지:\n{choices}\n\n"
             "1, 2, 3, 4, 5 중에 하나를 정답으로 고르세요.\n"
@@ -126,6 +159,7 @@ ZERO_SHOT_COT_KR_PROMPT = {
         ),
         "question_plus_5": (
             "지문:\n{paragraph}\n\n"
+            "참고:\n{reference}\n\n"
             "질문:\n{question}\n\n"
             "<보기>:\n{question_plus}\n\n"
             "선택지:\n{choices}\n\n"
@@ -145,6 +179,7 @@ ZERO_SHOT_COT_KR_PROMPT = {
     "user_msg": {
         "no_question_plus_5": (
             "지문:\n{paragraph}\n\n"
+            "참고:\n{reference}\n\n"
             "질문:\n{question}\n\n"
             "선택지:\n{choices}\n\n"
             "1, 2, 3, 4, 5 중에 하나를 정답으로 고르세요.\n"
@@ -154,6 +189,7 @@ ZERO_SHOT_COT_KR_PROMPT = {
         ),
         "question_plus_5": (
             "지문:\n{paragraph}\n\n"
+            "참고:\n{reference}\n\n"
             "질문:\n{question}\n\n"
             "<보기>:\n{question_plus}\n\n"
             "선택지:\n{choices}\n\n"
@@ -165,26 +201,3 @@ ZERO_SHOT_COT_KR_PROMPT = {
     },
 }
 
-#RAG 프롬프팅
-RAG_PROMPT = {
-    "system_msg": "지문을 읽고 질문의 답을 구하세요.",
-    "user_msg": {
-        "no_question_plus_5": (
-            "지문:\n{paragraph}\n\n"
-            "참고:\n{reference}\n\n"
-            "질문:\n{question}\n\n"
-            "선택지:\n{choices}\n\n"
-            "1, 2, 3, 4, 5 중에 하나를 정답으로 고르세요.\n"
-            "정답:"
-        ),
-        "question_plus_5": (
-            "지문:\n{paragraph}\n\n"
-            "참고:\n{reference}\n\n"
-            "질문:\n{question}\n\n"
-            "<보기>:\n{question_plus}\n\n"
-            "선택지:\n{choices}\n\n"
-            "1, 2, 3, 4, 5 중에 하나를 정답으로 고르세요.\n"
-            "정답:"
-        ),
-    },
-}

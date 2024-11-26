@@ -8,9 +8,9 @@ from tqdm import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
 
-from src.utils import get_sft_config
 from unsloth import FastLanguageModel
 from peft import AutoPeftModelForCausalLM, LoraConfig
+from unsloth import UnslothTrainer, UnslothTrainingArguments, is_bfloat16_supported
 
 
 def formatting_prompts_func(example, tokenizer):
@@ -53,15 +53,16 @@ def tokenize_dataset(dataset, tokenizer):
 class MyModel():
     def __init__(self, config, mode):
         self.config = config
-        self.peft_c = config['peft']
         self.model_c = config['model']
+        self.peft_c = config['peft']
+        self.unsloth_c = config['UnslothTrainingArguments']
 
         if mode == "train":
             self.model, self.tokenizer = FastLanguageModel.from_pretrained(
-                model_name=config['model']['train']['train_model_name'],
-                max_seq_length=config['model']['max_seq_length'],
-                dtype=getattr(torch, config['model']['torch_dtype']),
-                load_in_4bit=config['model']['load_in_4bit']
+                model_name=self.model_c['train']['train_model_name'],
+                max_seq_length=self.model_c['max_seq_length'],
+                dtype=None,
+                load_in_4bit=True
             )
             
             self.model = FastLanguageModel.get_peft_model(
@@ -72,40 +73,37 @@ class MyModel():
                 target_modules=self.peft_c['target_modules'],
                 bias=self.peft_c['bias'],
                 use_gradient_checkpointing=self.peft_c['use_gradient_checkpointing'],
-                random_state=self.peft_c['random_state'],
+                random_state=self.config['seed'],
                 use_rslora=self.peft_c['use_rslora'],
-                loftq_config=self.peft_c['loftq_config'],
+                loftq_config=None,
             )
 
-        elif mode == "test":
-            self.model = AutoPeftModelForCausalLM.from_pretrained(
-                self.model_c['test']['test_checkpoint_path'],
-                trust_remote_code=True,
-                device_map="auto",
-            )            
-            self.tokenizer = AutoTokenizer.from_pretrained(
-                self.model_c['test']['test_checkpoint_path'],
-                trust_remote_code=True,
+        elif mode == "test":            
+            self.model, self.tokenizer = FastLanguageModel.from_pretrained(
+                model_name=self.model_c['test']['test_checkpoint_path'],
+                max_seq_length=self.model_c['max_seq_length'],
+                dtype=None,  # 자동 감지
+                load_in_4bit=True
             )
+            self.model = FastLanguageModel.for_inference(self.model)
         
         # chat template 직접 지정
-        if self.model_c["chat_template"]:
-            self.tokenizer.chat_template = (
-                "{% if messages[0]['role'] == 'system' %}"
-                "{% set system_message = messages[0]['content'] %}"
-                "{% endif %}"
-                "{% if system_message is defined %}"
-                "{{ system_message }}"
-                "{% endif %}"
-                "{% for message in messages %}"
-                "{% set content = message['content'] %}"
-                "{% if message['role'] == 'user' %}"
-                "{{ '<start_of_turn>user\n' + content + '<end_of_turn>\n<start_of_turn>model\n' }}"
-                "{% elif message['role'] == 'assistant' %}"
-                "{{ content + '<end_of_turn>\n' }}"
-                "{% endif %}"
-                "{% endfor %}"
-            )
+        self.tokenizer.chat_template = (
+            "{% if messages[0]['role'] == 'system' %}"
+            "{% set system_message = messages[0]['content'] %}"
+            "{% endif %}"
+            "{% if system_message is defined %}"
+            "{{ system_message }}"
+            "{% endif %}"
+            "{% for message in messages %}"
+            "{% set content = message['content'] %}"
+            "{% if message['role'] == 'user' %}"
+            "{{ '<start_of_turn>user\n' + content + '<end_of_turn>\n<start_of_turn>model\n' }}"
+            "{% elif message['role'] == 'assistant' %}"
+            "{{ content + '<end_of_turn>\n' }}"
+            "{% endif %}"
+            "{% endfor %}"
+        )
 
         # metric 로드
         self.acc_metric = evaluate.load("accuracy")
@@ -117,10 +115,18 @@ class MyModel():
     def tokenize(self, processed_train):
         tokenized = tokenize_dataset(processed_train, self.tokenizer)
 
+        # debug
+        before_count = len(tokenized)  # 필터링 전 데이터 개수
         tokenized = tokenized.filter(lambda x: len(x["input_ids"]) <= self.model_c['max_seq_length'])
+        after_count = len(tokenized)  # 필터링 후 데이터 개수
+        print(f"Data before filtering: {before_count}")
+        print(f"Data after filtering: {after_count}")
+        print(f"Number of removed data: {before_count - after_count}")
+        # debug
         
+        # train, valid 데이터셋 분리
         if self.model_c['train_valid_split']:
-            tokenized = tokenized.train_test_split(test_size=0.1, seed=42)
+            tokenized = tokenized.train_test_split(test_size=0.1, seed=self.config['seed'])
             print("*"*50)
             print("Log: Train Vaild 9:1로 나눴음")
             print("*"*50)
@@ -170,22 +176,43 @@ class MyModel():
         self.tokenizer.padding_side = 'right'
         
         do_eval = self.eval_dataset is not None
-        sft_config = get_sft_config(self.config, do_eval=do_eval)
-
-        trainer_args = {
-            "model": self.model,
-            "train_dataset": self.train_dataset,
-            "data_collator": data_collator,
-            "tokenizer": self.tokenizer,
-            "args": sft_config
-        }
         
-        if do_eval:
-            trainer_args["eval_dataset"] = self.eval_dataset
-            trainer_args["compute_metrics"] = compute_metrics
-            trainer_args["preprocess_logits_for_metrics"] = preprocess_logits_for_metrics
+        trainer = UnslothTrainer(
+            model=self.model,
+            tokenizer=self.tokenizer,
+            train_dataset=self.train_dataset,
+            eval_dataset=self.eval_dataset if do_eval else None,
+            data_collator=data_collator,
+            compute_metrics=compute_metrics if do_eval else None,
+            preprocess_logits_for_metrics=preprocess_logits_for_metrics if do_eval else None,
+            dataset_num_proc=4,
 
-        trainer = SFTTrainer(**trainer_args)
+            args = UnslothTrainingArguments(
+                do_train=True,
+                do_eval=True if do_eval else False,
+                per_device_train_batch_size = self.unsloth_c['per_device_train_batch_size'],
+                per_device_eval_batch_size= self.unsloth_c['per_device_eval_batch_size'],
+                gradient_accumulation_steps = self.unsloth_c['gradient_accumulation_steps'],
+                warmup_ratio = self.unsloth_c['warmup_ratio'],
+                num_train_epochs = self.unsloth_c['num_train_epochs'],
+                learning_rate = float(self.unsloth_c['learning_rate']),
+                embedding_learning_rate = float(self.unsloth_c['embedding_learning_rate']),
+                fp16 = not is_bfloat16_supported(),
+                bf16 = is_bfloat16_supported(),
+                logging_steps = 500,
+                optim = self.unsloth_c['optim'],
+                weight_decay = self.unsloth_c['weight_decay'],
+                lr_scheduler_type = self.unsloth_c['lr_scheduler_type'],
+                seed = self.config['seed'],
+                max_seq_length=self.model_c['max_seq_length'],
+                output_dir=self.model_c['train']['train_checkpoint_path'],
+                save_strategy=self.unsloth_c['save_strategy'],
+                eval_strategy="epoch" if do_eval else "no",
+                save_total_limit=self.unsloth_c['save_total_limit'],
+                save_only_model=self.unsloth_c['save_only_model'],
+                report_to="wandb",
+            ),
+        )        
 
         trainer.train()
     
@@ -214,7 +241,8 @@ class MyModel():
 
                 probs = (
                     torch.nn.functional.softmax(
-                        torch.tensor(target_logit_list, dtype=torch.float32)
+                        torch.tensor(target_logit_list, dtype=torch.float32),
+                        dim=0
                     ).detach().cpu().numpy()
                 )
 
