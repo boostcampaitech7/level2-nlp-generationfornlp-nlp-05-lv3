@@ -1,43 +1,43 @@
 model:
-  experiment_name: &experiment_name "241126_(Qwen_32B)_(train_rag_dense10_v2_list)_(sota_integration_rag)"  # 공통 부분 정의
+  experiment_name: &experiment_name "Experiment_Sample" # Define common experiment name
   train:
-    train_model_name: "unsloth/Qwen2.5-32B-Instruct-bnb-4bit" # 학습할 모델 이름
-    train_csv_path: "data/rag_results/train_rag_dense10_v2_list.csv" # train csv 파일 경로
-    train_checkpoint_path: "checkpoints/{experiment_name}" # 학습한 체크포인트 저장 경로
+    train_model_name: "unsloth/Qwen2.5-32B-Instruct-bnb-4bit" # Model name for training
+    train_csv_path: "data/rag_results/train_rag_rerank3_v2_list.csv"  # Path to train CSV file
+    train_checkpoint_path: "checkpoints/{experiment_name}" # Path to save training checkpoints
   test:
-    test_checkpoint_path: "checkpoints/{experiment_name}/checkpoint-332" # 추론할 체크포인트 경로
-    test_csv_path: "data/rag_results/test_rag_dense10_v2_list.csv" # test 파일 경로
-    test_output_csv_path: "data/outputs/{experiment_name}.csv" # 리더보드 제출용 csv 파일 경로
+    test_checkpoint_path: "checkpoints/{experiment_name}/checkpoint-298" # Path to inference checkpoint
+    test_csv_path: "data/rag_results/test_rag_rerank3_v2_list.csv"  # Path to test CSV file
+    test_output_csv_path: "data/outputs/{experiment_name}.csv"  # Path for leaderboard submission CSV file
 
-  max_seq_length: 8192
-  prompt_name: "SOTA_PROMPT"
-  rag: True
-  uniform_answer_distribution: False
-  train_valid_split: False # True: 0.9 / 0.1
+  max_seq_length: 4096  # Maximum sequence length for the model
+  prompt_name: "BASE_PROMPT"  # Name of the prompt template in the prompt file
+  rag: True  # Enable retrieval-augmented generation
+  uniform_answer_distribution: True  # Ensure uniform answer distribution
+  train_valid_split: True  # If True, split train and validation datasets (0.9/0.1)
 
-seed: 3407
+seed: 3407  # Seed for reproducibility
 
 FastLanguageModel:
-  # model_name -> 'train_model_name'로 설정
-  # max_seq_length: -> 'max_seq_length'로 설정
-  # dtype -> None 하드 코딩
-  # load_in_4bit -> True 하드 코딩
+  # model_name -> Set to 'train_model_name'
+  # max_seq_length -> Set to 'max_seq_length'
+  # dtype -> Hardcoded to None
+  # load_in_4bit -> Hardcoded to True
 
 peft:
-  # model_name -> 'train_model_name'로 설정
+  # model_name -> Set to 'train_model_name'
   r: 64
   lora_alpha: 32
   lora_dropout: 0
   target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj",]
   bias: "none"
   use_gradient_checkpointing: "unsloth"
-  # random_state -> 'seed'로 설정
+  # random_state -> Set to 'seed'
   use_rslora: True
-  # loftq_config -> None 하드 코딩
+  # loftq_config -> Hardcoded to None
 
 UnslothTrainingArguments:
-  # do_train -> True 하드 코딩
-  # do_eval -> 'train_valid_split'에 따라 자동 설정
+  # do_train -> Hardcoded to True
+  # do_eval -> Automatically set based on 'train_valid_split'
   per_device_train_batch_size: 2
   per_device_eval_batch_size: 2
   gradient_accumulation_steps: 8
@@ -45,17 +45,17 @@ UnslothTrainingArguments:
   num_train_epochs: 2
   learning_rate: 5e-5
   embedding_learning_rate: 1e-6
-  # fp16 -> not is_bfloat16_supported() 하드 코딩
-  # bf16 -> is_bfloat16_supported() 하드 코딩
-  # logging_steps -> 500 하드 코딩
+  # fp16 -> Hardcoded to not is_bfloat16_supported()
+  # bf16 -> Hardcoded to is_bfloat16_supported()
+  # logging_steps -> Hardcoded to 1
   optim: "adamw_8bit"
   weight_decay: 0.01
   lr_scheduler_type: "linear"
-  # seed -> 'seed'로 설정
-  # max_seq_length -> 'max_seq_length'로 설정
-  # output_dir -> 'train_checkpoint_path'로 설정
+  # seed -> Set to 'seed'
+  # max_seq_length -> Set to 'max_seq_length'
+  # output_dir -> Set to 'train_checkpoint_path'
   save_strategy: "epoch"
-  eval_strategy: "no"
+  # eval_strategy: "no" -> Automatically set based on 'do_eval'
   save_total_limit: 2
   save_only_model: True
-  # report_to -> 'wandb' 하드 코딩
+  # report_to -> Hardcoded to 'wandb'
