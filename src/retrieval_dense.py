@@ -10,102 +10,114 @@ from langchain_community.document_loaders import DataFrameLoader
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain_community.vectorstores.utils import DistanceStrategy
-from langchain_community.retrievers import BM25Retriever
 from langchain.schema import Document
-from langchain.retrievers import ContextualCompressionRetriever
-from langchain.retrievers import EnsembleRetriever
-from langchain.retrievers.document_compressors import CrossEncoderReranker
-from langchain_community.cross_encoders import HuggingFaceCrossEncoder
 from langchain_huggingface import HuggingFaceEmbeddings
+tqdm.pandas()
 
-import matplotlib.pyplot as plt
-import ast
-
+# Initialize MeCab for Korean tokenization
 mecab = MeCab.Tagger()
 def extract_nouns(text):
+    """
+    Extract nouns from the given text using MeCab.
+
+    Args:
+        text (str): Input text.
+    
+    Returns:
+        list: A list of extracted nouns.
+    """
     try:
         parsed = mecab.parse(text)
         nouns = []
         for line in parsed.splitlines():
-            if '\t' in line:  # MeCab 출력에서 유효한 줄만 처리
+            if '\t' in line:  # Process valid lines in MeCab output
                 word, feature = line.split('\t')
-                if feature.startswith('NNG') or feature.startswith('NNP'):  # 보통명사, 고유명사
+                if feature.startswith('NNG') or feature.startswith('NNP'):  # Common or proper nouns
                     nouns.append(word)
         return nouns
     except Exception as e:
         print(f"Error during MeCab parsing: {e}")
-        return text  # 실패 시 원문 반환
+        return text  # Return original text on failure
 
 
 def evaluate_metrics_threshold(df, retriever):
-    result_df = df.copy()
+    """
+    Evaluate retrieval metrics (Hit@K, MRR, Precision) with a given retriever.
 
-    # Retrieval
+    Args:
+        df (pd.DataFrame): Evaluation dataset.
+        retriever: Retriever object to perform document retrieval.
+
+    Returns:
+        tuple: Result dataframe, Hit@K, MRR@K, Average Precision.
+    """
+    result_df = df.copy()
     result_df['reference'] = ""
+    
     for idx, row in tqdm(result_df.iterrows()):
         retrieved_docs = retriever.invoke(row['query'])
-        if retrieved_docs:  # 검색된 문서가 있는 경우
+        if retrieved_docs: # If documents are retrieved
             references = [ref.page_content for ref in retrieved_docs]
             result_df.loc[idx, 'reference'] = str(references)
-        else:  # 검색된 문서가 없는 경우
+        else:  # If no documents are retrieved
             result_df.loc[idx, 'reference'] = ""
 
     # Metric 계산 초기화
-    total_hits = 0  # 전체 hit 수
-    total_reciprocal_rank = 0.0  # 전체 reciprocal rank 합계
-    total_precision = 0.0  # 전체 precision 합계
-    valid_rows = 0  # 유효한 행의 수 (reference가 존재하는 행)
+    total_hits = 0  # Total number of hits
+    total_reciprocal_rank = 0.0  # Sum of reciprocal ranks
+    total_precision = 0.0  # Sum of precision
+    valid_rows = 0  # Number of valid rows (rows with references)
 
     result_df[['hit', 'rank', 'precision']] = [False, 0, 0.0]
 
     for idx, row in tqdm(result_df.iterrows()):
-        # Reference가 비어 있으면 무시
+        # Skip if reference is empty
         if not row['reference'] or row['reference'] == '[]':
             continue
 
-        # 키워드를 쉼표로 분리
+        # Split keywords by commas
         keywords = [kw.strip() for kw in row['keyword'].split(',')]
 
-        # 검색된 문서 리스트
+        # List of retrieved documents
         references = eval(row['reference'])
 
-        K = len(references)  # 검색된 문서 수 (Top K)
-        relevant_retrieved_docs = 0  # 검색 결과 중 관련 문서의 수 초기화
-        rank = 0  # 관련 문서의 첫번째 등장 순위 초기화
+        K = len(references)  # Number of retrieved documents (Top K)
+        relevant_retrieved_docs = 0  # Number of relevant documents retrieved
+        rank = 0  # Rank of the first relevant document
         found = False
 
         for i, doc in enumerate(references):
-            # 문서의 공백 제거
+            # Remove whitespace from document
             doc_no_space = doc.replace(' ', '').replace('\n', '')
             doc_is_relevant = False
             for kw in keywords:
-                # 키워드의 공백 제거
+                # Remove whitespace from keywords
                 kw_no_space = kw.replace(' ', '')
-                # 키워드가 문서에 포함되어 있는지 확인
+                # Check if keyword is in the document
                 if kw_no_space in doc_no_space:
                     doc_is_relevant = True
                     if not found:
-                        rank = i + 1  # 순위는 1부터 시작
+                        rank = i + 1  # Rank starts from 1
                         found = True
-                    break  # 키워드를 찾았으므로 내부 루프 종료
+                    break  # Exit inner loop as keyword is found
             if doc_is_relevant:
-                relevant_retrieved_docs += 1  # 관련된 문서의 수 1 증가
+                relevant_retrieved_docs += 1  # Increment count of relevant documents
 
         if rank > 0:
             result_df.loc[idx, 'hit'] = True
             result_df.loc[idx, 'rank'] = rank
-            total_hits += 1  # hit 증가
-            reciprocal_rank = 1.0 / rank  # 역순위 계산
-            total_reciprocal_rank += reciprocal_rank  # 역순위 합계에 추가
+            total_hits += 1  # Increment hit count
+            reciprocal_rank = 1.0 / rank  # Calculate reciprocal rank
+            total_reciprocal_rank += reciprocal_rank  # Add to total reciprocal rank
 
-        # 현재 쿼리에 대한 precision 계산
+        # Calculate precision for current query
         precision = relevant_retrieved_docs / K if K > 0 else 0
         result_df.loc[idx, 'precision'] = precision
         total_precision += precision
 
-        valid_rows += 1  # reference가 존재하는 유효한 행의 수 증가
+        valid_rows += 1  # Increment count of valid rows
 
-    # 전체 metric 계산
+    # Calculate overall metrics
     if valid_rows > 0:
         hit_at_k = total_hits / valid_rows
         mrr_at_k = total_reciprocal_rank / valid_rows
@@ -119,77 +131,87 @@ def evaluate_metrics_threshold(df, retriever):
 
 
 def evaluate_metrics_threshold_jaccard(df, retriever, topk=3):
-    result_df = df.copy()
+    """
+    Evaluate retrieval metrics (Hit@K, MRR, Precision) using Jaccard similarity re-ranking.
 
-    # Retrieval
+    Args:
+        df (pd.DataFrame): Evaluation dataset.
+        retriever: Retriever object to perform document retrieval.
+        topk (int): Number of top documents to re-rank and evaluate.
+
+    Returns:
+        tuple: Result dataframe, Hit@K, MRR@K, Average Precision.
+    """
+    result_df = df.copy()
     result_df['reference'] = ""
+    
     for idx, row in tqdm(result_df.iterrows(), total=len(result_df)):
-        # Dense retriever로 상위 topk_base 문서 가져오기
+        # Retrieve topk_base documents using dense retriever
         retrieved_docs = retriever.invoke(row['query'])
-        if retrieved_docs:  # 검색된 문서가 있는 경우
-            # Jaccard 유사도를 이용해 재정렬
+        if retrieved_docs:  # If documents are retrieved
+            # Re-rank documents using Jaccard similarity
             reranked_docs = jaccard_reranker(row['query'], retrieved_docs, topk=topk)
             references = [ref.page_content for ref in reranked_docs]
             result_df.loc[idx, 'reference'] = str(references)
-        else:  # 검색된 문서가 없는 경우
+        else:  # If no documents are retrieved
             result_df.loc[idx, 'reference'] = "[]"
 
-    # Metric 계산 초기화
-    total_hits = 0  # 전체 hit 수
-    total_reciprocal_rank = 0.0  # 전체 reciprocal rank 합계
-    total_precision = 0.0  # 전체 precision 합계
-    valid_rows = 0  # 유효한 행의 수 (reference가 존재하는 행)
+    # Initialize metrics
+    total_hits = 0  # Total number of hits
+    total_reciprocal_rank = 0.0  # Sum of reciprocal ranks
+    total_precision = 0.0  # Sum of precision
+    valid_rows = 0  # Number of valid rows (rows with references)
 
     result_df[['hit', 'rank', 'precision']] = [False, 0, 0.0]
 
     for idx, row in tqdm(result_df.iterrows(), total=len(result_df)):
-        # Reference가 비어 있으면 무시
+        # Skip if reference is empty
         if not row['reference'] or row['reference'] == '[]':
             continue
 
-        # 키워드를 쉼표로 분리
+        # Split keywords by commas
         keywords = [kw.strip() for kw in row['keyword'].split(',')]
 
-        # 검색된 문서 리스트
-        references = ast.literal_eval(row['reference'])
+        # List of retrieved documents
+        references = literal_eval(row['reference'])
 
-        K = len(references)  # 검색된 문서 수 (Top K)
-        relevant_retrieved_docs = 0  # 검색 결과 중 관련 문서의 수 초기화
-        rank = 0  # 관련 문서의 첫번째 등장 순위 초기화
+        K = len(references)  # Number of retrieved documents (Top K)
+        relevant_retrieved_docs = 0  # Number of relevant documents retrieved
+        rank = 0  # Rank of the first relevant document
         found = False
 
         for i, doc in enumerate(references):
-            # 문서의 공백 제거
+            # Remove whitespace from document
             doc_no_space = doc.replace(' ', '').replace('\n', '')
             doc_is_relevant = False
             for kw in keywords:
-                # 키워드의 공백 제거
+                # Remove whitespace from keywords
                 kw_no_space = kw.replace(' ', '')
-                # 키워드가 문서에 포함되어 있는지 확인
+                # Check if keyword is in the document
                 if kw_no_space in doc_no_space:
                     doc_is_relevant = True
                     if not found:
-                        rank = i + 1  # 순위는 1부터 시작
+                        rank = i + 1  # Rank starts from 1
                         found = True
-                    break  # 키워드를 찾았으므로 내부 루프 종료
+                    break  # Exit inner loop as keyword is found
             if doc_is_relevant:
-                relevant_retrieved_docs += 1  # 관련된 문서의 수 1 증가
+                relevant_retrieved_docs += 1  # Increment count of relevant documents
 
         if rank > 0:
             result_df.loc[idx, 'hit'] = True
             result_df.loc[idx, 'rank'] = rank
-            total_hits += 1  # hit 증가
-            reciprocal_rank = 1.0 / rank  # 역순위 계산
-            total_reciprocal_rank += reciprocal_rank  # 역순위 합계에 추가
+            total_hits += 1  # Increment hit count
+            reciprocal_rank = 1.0 / rank  # Calculate reciprocal rank
+            total_reciprocal_rank += reciprocal_rank  # Add to total reciprocal rank
 
-        # 현재 쿼리에 대한 precision 계산
+        # Calculate precision for current query
         precision = relevant_retrieved_docs / K if K > 0 else 0
         result_df.loc[idx, 'precision'] = precision
         total_precision += precision
 
-        valid_rows += 1  # reference가 존재하는 유효한 행의 수 증가
+        valid_rows += 1  # Increment count of valid rows
 
-    # 전체 metric 계산
+    # Calculate overall metrics
     if valid_rows > 0:
         hit_at_k = total_hits / valid_rows
         mrr_at_k = total_reciprocal_rank / valid_rows
@@ -203,7 +225,17 @@ def evaluate_metrics_threshold_jaccard(df, retriever, topk=3):
 
 
 def jaccard_reranker(query, retrieved_docs, topk=5):
-    # Jaccard 유사도 기반 재정렬
+    """
+    Re-rank retrieved documents based on Jaccard similarity.
+
+    Args:
+        query (str): Input query.
+        retrieved_docs (list): Retrieved documents.
+        topk (int): Number of top documents to return.
+    
+    Returns:
+        list: Re-ranked documents.
+    """
     tokenized_query = extract_nouns(query)
     context_scores = []
     for doc in retrieved_docs:
@@ -212,13 +244,22 @@ def jaccard_reranker(query, retrieved_docs, topk=5):
         score = len(common_terms) / len(set(tokenized_query).union(set(tokenized_context))) 
         context_scores.append(score)
 
-    # 유사도 점수에 따라 컨텍스트 재정렬 후 상위 topk 반환
+    # Re-rank contexts based on similarity scores and return topk documents
     reranked_docs = [doc for _, doc in sorted(zip(context_scores, retrieved_docs), key=lambda x: x[0], reverse=True)][:topk]
     
     return reranked_docs
 
 
 def process_row(row):
+    """
+    Process a single row from the evaluation dataset for retrieval.
+
+    Args:
+        row (pd.Series): Single row from the dataset.
+    
+    Returns:
+        list: Retrieved documents.
+    """
     problems = literal_eval(row['problems'])
     paragraph = row['paragraph']
     question = problems['question']
@@ -227,27 +268,27 @@ def process_row(row):
     
     query = prompt.format(paragraph=paragraph, question=question, choices=choices_str)
     
-    # 보수적 기준: 길이가 500자 이상인 문서 제외
+    # Conservative criterion: Exclude documents longer than 500 characters
     if len(str(paragraph)) > 500:
         return []
     
-    # Dense retriever로 문서 검색
+    # Retrieve documents using dense retriever
     docs = faiss_retriever.invoke(query)
     
     if docs:
-        # Jaccard 유사도로 재정렬
+        # Re-rank using Jaccard similarity
         reranked_docs = jaccard_reranker(query, docs, topk=topk)
-        # 최종 상위 topk 문서 추출
+        # Extract topk documents
         retrieved_docs = [doc.page_content for doc in reranked_docs]
         return retrieved_docs
     else:
         return []
 
 
-# Retrieval evaluation dataset
+# Load evaluation dataset
 eval_set = pd.read_csv("/data/ephemeral/home/workspace/contest_baseline_code/data/rag_eval/external_knowledge_w_label_keyword.csv")
 prompt = "{paragraph}\n{question}\n{choices}"
-eval_set['query'] = ""  # input 형태 맞추기
+eval_set['query'] = ""
 for idx, row in eval_set.iterrows():
     problems = literal_eval(row['problems'])
     question = problems['question']
@@ -256,24 +297,21 @@ for idx, row in eval_set.iterrows():
     query = prompt.format(paragraph=row['paragraph'], question=question, choices=choices_str)
     eval_set.loc[idx, 'query'] = query
 
-# RAG Data Loading 
+# Load and process RAG data
 rag_folder = "/data/ephemeral/home/workspace/contest_baseline_code/data/rag"
 rag_files = glob(f"{rag_folder}/*.csv")
-
-# Concatenate RAG data
 rag_data_source = [pd.read_csv(file) for file in rag_files]
 rag_data = pd.concat(rag_data_source, axis=0, ignore_index=True)
 print(f"RAG Data Count: {rag_data.shape[0]}")
 
-# Use only documents with at least 25 characters
+# Filter documents
 rag_data = rag_data[rag_data.context.str.len() >= 25]
 print(f"filtered (len > 25) RAG Data Count: {rag_data.shape[0]}")
 
-# Rag Data Chunking
+# Chunk documents
 loader = DataFrameLoader(rag_data, page_content_column='context')
 documents = loader.load()
 
-# Chunking
 chunk_size = 800
 chunk_overlap = 200
 
@@ -286,7 +324,7 @@ text_splitter = CharacterTextSplitter.from_tiktoken_encoder(
 split_docs = text_splitter.split_documents(tqdm(documents))
 print(f"Chunked Document Count: {len(split_docs)}")
 
-# load vector DB
+# Load vector store
 model_name = 'dragonkue/BGE-m3-ko'
 device = 'cuda'
 
@@ -314,7 +352,7 @@ else:
         distance_strategy=DistanceStrategy.COSINE
     )
 
-    batch_size = 4  # 적절한 배치 크기로 조절 가능
+    batch_size = 4
     docs_to_add = split_docs[1:]
     with tqdm(total=len(docs_to_add), desc="Ingesting documents") as pbar:
         for i in range(0, len(docs_to_add), batch_size):
@@ -347,25 +385,18 @@ faiss_retriever = vector_store.as_retriever(
 # print(f"Precision@{topk}: {avg_precision:.4f}")
 # print(f"문서 개수: {len(valid_df)}")
 
-# test set 저장
-tqdm.pandas()
-
-target_data = pd.read_csv("/data/ephemeral/home/workspace/contest_baseline_code/data/preprocessed/train_fix_khan_kor_v2_korean.csv")
 
 prompt = "{paragraph} {question} {choices}"
+
+# Save Train Dataset
+target_data = pd.read_csv("/data/ephemeral/home/workspace/contest_baseline_code/data/preprocessed/train_fix_khan_kor_v2_korean.csv")
     
-# query 생성
 target_data['reference'] = target_data.progress_apply(process_row, axis=1)
 
-# 결과 저장
 target_data.to_csv(f"/data/ephemeral/home/workspace/contest_baseline_code/data/preprocessed/train_rag_rerank{topk}_final.csv", index=False)
 
-# test set 저장
+# Save Test Dataset
 target_data = pd.read_csv("/data/ephemeral/home/workspace/contest_baseline_code/data/raw/test.csv")
-prompt = "{paragraph} {question} {choices}"
-
-# query 생성
 target_data['reference'] = target_data.progress_apply(process_row, axis=1)
 
-# 결과 저장
 target_data.to_csv(f"/data/ephemeral/home/contest_baseline_code/data/preprocessed/test_rag_rerank{topk}_v2_list.csv", index=False)

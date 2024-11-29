@@ -23,26 +23,35 @@ from rank_bm25 import BM25Okapi
 from typing import List
 
 import matplotlib.pyplot as plt
+tqdm.pandas()
 
 
 # Define the Document class
 class Document:
+    """
+    Represents a document with its content and score.
+
+    Attributes:
+        page_content (str): The content of the document.
+        score (float): The relevance score of the document.
+    """
     def __init__(self, page_content, score):
         self.page_content = page_content
         self.score = score
 
+
 # Modify CustomBM25Retriever
 class CustomBM25Retriever:
-    def __init__(self, bm25_instance, documents_df, topk=5, score_threshold=0.4):
-        """
-        Custom BM25 Retriever that fetches top-k documents above a score threshold.
+    """
+    Custom BM25 Retriever that fetches top-k documents above a score threshold.
 
-        Args:
-            bm25_instance (BM25Okapi): An instance of BM25Okapi.
-            documents_df (pd.DataFrame): DataFrame containing the documents.
-            topk (int): Number of top documents to retrieve.
-            score_threshold (float): Minimum BM25 score to consider.
-        """
+    Args:
+        bm25_instance (BM25Okapi): An instance of BM25Okapi for BM25 ranking.
+        documents_df (pd.DataFrame): DataFrame containing the documents to retrieve from.
+        topk (int): Number of top documents to retrieve.
+        score_threshold (float): Minimum BM25 score to consider a document relevant.
+    """
+    def __init__(self, bm25_instance, documents_df, topk=5, score_threshold=0.4):
         self.bm25 = bm25_instance
         self.documents_df = documents_df
         self.topk = topk
@@ -58,22 +67,22 @@ class CustomBM25Retriever:
         Returns:
             List[Document]: List of Document instances containing document content and score.
         """
-        processed_query = extract_nouns(query)
+        processed_query = extract_nouns(query) # Extract nouns from the query
         if not processed_query:
-            print("검색어에서 명사를 추출할 수 없습니다.")
+            print("Could not extract nouns from the query.")
             return []
 
-        scores = self.bm25.get_scores(processed_query)
-        top_k_indices = np.argsort(scores)[::-1][:self.topk]
+        scores = self.bm25.get_scores(processed_query)  # Compute BM25 scores
+        top_k_indices = np.argsort(scores)[::-1][:self.topk]  # Get indices of top-k scores
         results = []
         for idx in top_k_indices:
             score = scores[idx]
-            if score >= self.score_threshold:
+            if score >= self.score_threshold:  # Only include documents above the threshold
                 original_document = self.documents_df.iloc[idx]['context']
                 # Create a Document instance
                 doc = Document(
                     page_content=original_document,
-                    score=min(score / 100, 1)
+                    score=min(score / 100, 1)  # Normalize score
                 )
                 results.append(doc)
         return results
@@ -89,6 +98,7 @@ class CustomBM25Retriever:
             List[Document]: Retrieved documents with scores.
         """
         return self.retrieve(query)
+
 
 # Initialize MeCab Tagger
 mecab = MeCab.Tagger()
@@ -115,75 +125,86 @@ def extract_nouns(text):
         print(f"Error processing text: {text}, Error: {e}")
         return []
 
-def evaluate_metrics_threshold(df, retriever):
-    result_df = df.copy()
 
-    # Retrieval
+def evaluate_metrics_threshold(df, retriever):
+    """
+    Evaluate retrieval metrics such as Hit@K, MRR@K, and Precision.
+
+    Args:
+        df (pd.DataFrame): Dataset for evaluation containing queries and keywords.
+        retriever (CustomBM25Retriever): Retriever to perform document retrieval.
+
+    Returns:
+        tuple: A tuple containing the result dataframe, Hit@K, MRR@K, and average precision.
+    """    
+    result_df = df.copy()
     result_df['reference'] = ""
+    
+    # Perform document retrieval
     for idx, row in tqdm(result_df.iterrows()):
         retrieved_docs = retriever.invoke(row['query'])
-        if retrieved_docs:  # 검색된 문서가 있는 경우
+        if retrieved_docs:  # If documents are retrieved
             references = [ref.page_content for ref in retrieved_docs]
             result_df.loc[idx, 'reference'] = str(references)
-        else:  # 검색된 문서가 없는 경우
+        else:  # If no documents are retrieved
             result_df.loc[idx, 'reference'] = ""
 
-    # Metric 계산 초기화
-    total_hits = 0  # 전체 hit 수
-    total_reciprocal_rank = 0.0  # 전체 reciprocal rank 합계
-    total_precision = 0.0  # 전체 precision 합계
-    valid_rows = 0  # 유효한 행의 수 (reference가 존재하는 행)
+    # Initialize metrics
+    total_hits = 0  # Total number of hits
+    total_reciprocal_rank = 0.0  # Sum of reciprocal ranks
+    total_precision = 0.0  # Sum of precision
+    valid_rows = 0  # Number of valid rows (rows with references)
 
     result_df[['hit', 'rank', 'precision']] = [False, 0, 0.0]
 
     for idx, row in tqdm(result_df.iterrows()):
-        # Reference가 비어 있으면 무시
+        # Skip rows with no references
         if not row['reference'] or row['reference'] == '[]':
             continue
 
-        # 키워드를 쉼표로 분리
+        # Extract keywords
         keywords = [kw.strip() for kw in row['keyword'].split(',')]
 
-        # 검색된 문서 리스트
+        # List of retrieved documents
         references = eval(row['reference'])
 
-        K = len(references)  # 검색된 문서 수 (Top K)
-        relevant_retrieved_docs = 0  # 검색 결과 중 관련 문서의 수 초기화
-        rank = 0  # 관련 문서의 첫번째 등장 순위 초기화
+        K = len(references)  # Number of retrieved documents (Top K)
+        relevant_retrieved_docs = 0  # Count of relevant retrieved documents
+        rank = 0  # Rank of the first relevant document
         found = False
 
         for i, doc in enumerate(references):
-            # 문서의 공백 제거
+            # Remove whitespace from document content
             doc_no_space = doc.replace(' ', '').replace('\n', '')
             doc_is_relevant = False
             for kw in keywords:
-                # 키워드의 공백 제거
+                # Remove whitespace from keyword
                 kw_no_space = kw.replace(' ', '')
-                # 키워드가 문서에 포함되어 있는지 확인
+                # Check if the keyword is present in the document
                 if kw_no_space in doc_no_space:
                     doc_is_relevant = True
                     if not found:
-                        rank = i + 1  # 순위는 1부터 시작
+                        rank = i + 1  # Rank starts from 1
                         found = True
-                    break  # 키워드를 찾았으므로 내부 루프 종료
+                    break  # Exit inner loop when keyword is found
             if doc_is_relevant:
-                relevant_retrieved_docs += 1  # 관련된 문서의 수 1 증가
+                relevant_retrieved_docs += 1  # Increment relevant document count
 
         if rank > 0:
             result_df.loc[idx, 'hit'] = True
             result_df.loc[idx, 'rank'] = rank
-            total_hits += 1  # hit 증가
-            reciprocal_rank = 1.0 / rank  # 역순위 계산
-            total_reciprocal_rank += reciprocal_rank  # 역순위 합계에 추가
+            total_hits += 1  # Increment hit count
+            reciprocal_rank = 1.0 / rank  # Calculate reciprocal rank
+            total_reciprocal_rank += reciprocal_rank  # Add to total reciprocal rank
 
-        # 현재 쿼리에 대한 precision 계산
+        # Calculate precision for the query
         precision = relevant_retrieved_docs / K if K > 0 else 0
         result_df.loc[idx, 'precision'] = precision
         total_precision += precision
 
-        valid_rows += 1  # reference가 존재하는 유효한 행의 수 증가
+        valid_rows += 1  # Increment valid row count
 
-    # 전체 metric 계산
+    # Calculate overall metrics
     if valid_rows > 0:
         hit_at_k = total_hits / valid_rows
         mrr_at_k = total_reciprocal_rank / valid_rows
@@ -196,6 +217,15 @@ def evaluate_metrics_threshold(df, retriever):
     return result_df, hit_at_k, mrr_at_k, avg_precision
 
 def process_row(row):
+    """
+    Process a single row to create a query and retrieve relevant documents.
+
+    Args:
+        row (pd.Series): A row from the dataset containing the paragraph, question, and choices.
+
+    Returns:
+        List[str]: A list of retrieved document contents.
+    """
     problems = literal_eval(row['problems'])
     paragraph = row['paragraph']
     question = problems['question']
@@ -204,7 +234,8 @@ def process_row(row):
     
     query = prompt.format(paragraph=paragraph, question=question, choices=choices_str)
     
-    if len(str(paragraph)) > 500: # 보수적 기준: 약 600~700자, 널널한 기준: 약 300~400자
+    # Skip paragraphs longer than 500 characters    
+    if len(str(paragraph)) > 500:
         return []
     # sparse 사용
     docs = bm25_retriever.retrieve(query)
@@ -217,7 +248,7 @@ def process_row(row):
 # Retrieval evaluation dataset
 eval_set = pd.read_csv("/data/ephemeral/home/workspace/contest_baseline_code/data/rag_eval/external_knowledge_w_label_keyword.csv")
 prompt = "{paragraph}\n{question}\n{choices}"
-eval_set['query'] = ""  # input 형태 맞추기
+eval_set['query'] = ""
 for idx, row in eval_set.iterrows():
     problems = literal_eval(row['problems'])
     question = problems['question']
@@ -314,25 +345,18 @@ for i, result in enumerate(search_results, 1):
 # print(f"문서 개수: {len(valid_df)}")
 
 
-# train set 저장
-tqdm.pandas()
-
-target_data = pd.read_csv("/data/ephemeral/home/workspace/contest_baseline_code/data/preprocessed/train_fix_khan_kor_v2_korean.csv")
 prompt = "{paragraph} {question} {choices}"
-    
-# query 생성
-target_data['reference'] = target_data.progress_apply(process_row, axis=1)
 
-# 결과 저장
+# Save Train Dataset
+target_data = pd.read_csv("/data/ephemeral/home/workspace/contest_baseline_code/data/preprocessed/train_fix_khan_kor_v2_korean.csv")
+    
+target_data['reference'] = target_data.progress_apply(process_row, axis=1) # query
+
 target_data.to_csv(f"/data/ephemeral/home/contest_baseline_code/data/preprocessed/train_rag_sparse{topk}_v2_list.csv", index=False)
 
-
-# test set 저장
+# Save Test Dataset
 target_data = pd.read_csv("/data/ephemeral/home/contest_baseline_code/data/raw/test.csv")
-prompt = "{paragraph} {question} {choices}"
 
-# query 생성
 target_data['reference'] = target_data.progress_apply(process_row, axis=1)
 
-# 결과 저장
 target_data.to_csv(f"/data/ephemeral/home/contest_baseline_code/data/preprocessed/test_rag_sparse{topk}_v2_list.csv", index=False)
