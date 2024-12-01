@@ -4,4 +4,3 @@ wandb/*
 !wandb/.gitkeep
 checkpoints/*
 !checkpoints/.gitkeep
-!streamlit/assets/*.csv
