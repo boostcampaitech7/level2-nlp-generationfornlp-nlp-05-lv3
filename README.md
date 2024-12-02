@@ -1,6 +1,5 @@
 
-![Uploading GIFMaker_me.gif…]()
-
+![GIFMaker_me](https://github.com/user-attachments/assets/e35bf18d-9b2f-4b40-bfd5-ee3cbe9693ef)
 
 ## 베이스라인 코드 모듈화
 
