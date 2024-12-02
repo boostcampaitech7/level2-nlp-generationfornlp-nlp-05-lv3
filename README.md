@@ -10,6 +10,13 @@
 | 평가 지표 | 모델이 맞춘 문제 수를 전체 문제 수로 나눈 정확도(Accuracy)를 기준으로 합니다.|
 | 결과물 | [WrapUp Report](https://github.com/boostcampaitech7/level2-nlp-generationfornlp-nlp-05-lv3/blob/main/assets/NLP%E1%84%80%E1%85%B5%E1%84%8E%E1%85%A9%E1%84%83%E1%85%A2%E1%84%92%E1%85%AC_NLP_%E1%84%90%E1%85%B5%E1%86%B7%20%E1%84%85%E1%85%B5%E1%84%91%E1%85%A9%E1%84%90%E1%85%B3(05%E1%84%8C%E1%85%A9).pdf), [Presentation Material](https://github.com/boostcampaitech7/level2-nlp-generationfornlp-nlp-05-lv3/blob/main/assets/%5B5%E1%84%8C%E1%85%A9%5DLv2_%E1%84%89%E1%85%AE%E1%84%82%E1%85%B3%E1%86%BC%E1%84%86%E1%85%AE%E1%86%AB%E1%84%8C%E1%85%A6%E1%84%91%E1%85%AE%E1%86%AF%E1%84%8B%E1%85%B5_%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%84%8C%E1%85%A6%E1%86%A8%E1%84%90%E1%85%B3_%E1%84%87%E1%85%A1%E1%86%AF%E1%84%91%E1%85%AD%E1%84%8C%E1%85%A1%E1%84%85%E1%85%AD.pdf) |
 
+## 📃 KSAT Results
+
+본 프로젝트에서 개발한 sLLM을 활용한 2025학년도 수능의 국어(화법과 작문), 한국사, 사회 탐구 영역 풀이 결과입니다.
+
+![image](https://github.com/user-attachments/assets/ca280ffb-8598-4112-81f6-8f5fd04fb4dd)
+
+
 ## 🎖️ Leader Board
 
 프로젝트 결과 Public 리더보드 1등, Private 리더보드 1등을 기록하였습니다.
@@ -92,17 +99,11 @@
 | Top 2 | 0.8272 | 0.2 |
 | Top 1 | 0.8295 | 0.4 |
 
-### 📃 KSAT Results
-
-본 프로젝트에서 개발한 sLLM을 활용한 2025학년도 수능의 국어(화법과 작문), 한국사, 사회 탐구 영역 풀이 결과입니다.
-
-![image](https://github.com/user-attachments/assets/ca280ffb-8598-4112-81f6-8f5fd04fb4dd)
-
-
 
 ## 🎥 2025학년도 수능 문제 풀이 데모 영상
 
 https://github.com/user-attachments/assets/4448f058-6571-4037-9fb9-dfd8f86d5291
+
 
 ## 📁 프로젝트 구조
 
