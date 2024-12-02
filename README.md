@@ -154,7 +154,7 @@ python main.py --config {config_path} --mode {train/test}
 
 **config.yaml**
 
-[여기](https://www.notion.so/jinjae/config/config.yaml)에서 확인
+[여기](https://github.com/boostcampaitech7/level2-nlp-generationfornlp-nlp-05-lv3/blob/main/config/config.yaml)에서 확인
 
 **Demo 사용법**
 
