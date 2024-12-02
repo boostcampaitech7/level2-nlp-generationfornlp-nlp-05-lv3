@@ -1,5 +1,8 @@
-# 🏆 LV.2 NLP 프로젝트 : 수능형 문제 풀이 모델 생성
+<div align='center'>
 
+  # 🏆 LV.2 NLP 프로젝트 : 수능형 문제 풀이 모델 생성
+
+</div>
 <br><br>
 
 ## ✏️ 대회 소개
@@ -44,7 +47,7 @@
 <div align='center'>
 
 | 팀원 | 역할 |
-| --- | --- |
+| :----: | -------------- |
 | 곽희준 | 데이터 레이블링, EDA, 외부 데이터셋 탐색, GPT를 통한 데이터셋 증강 실험, 코드 리팩토링, LLM 학습 방법 설계, Fine-Tuning, RAG 파이프라인 구축, 최종 코드 정리 |
 | 김정은 | 데이터셋 레이블링, 모델 탐색 및 Fine-Tuning, 데이터셋 크롤링 및 전처리(공무원 기출, khan), 데이터셋 품질 테스트, RAG 시스템 구축 및 실험, 프롬프트 엔지니어링 |
 | 김진재 | 초기 팀 환경 구축 및 대시보드 제작, 데이터셋 레이블링, 데이터 탐색, RAG 데이터 전처리(번역), Retrieval 구축 및 실험 (Sparse) |
@@ -95,6 +98,8 @@
 
 정제, 증강을 다양하게 적용한 데이터셋과 LoRA 튜닝을 통해 `itsmenlp/unsloth_qwen_2.5_32B_bnb_4bit_finetuned`로 추론한 output의 accuracy Top 5로 weighted voting ensemble을 진행한 결과, 최종 Public Accuracy **0.8341**을 달성했습니다.
 
+<div align='center'>
+  
 | Output | Accuracy | Weight |
 | --- | --- | --- |
 | Top 5 | 0.8180 | 0.1 |
@@ -102,6 +107,8 @@
 | Top 3 | 0.8203 | 0.2 |
 | Top 2 | 0.8272 | 0.2 |
 | Top 1 | 0.8295 | 0.4 |
+
+</div>
 
 <br>
 
@@ -169,7 +176,7 @@ python src/retrieval_dense.py # 혹은 python src/retrieval_sparse.py
 python main.py --config {config_path} --mode {train/test}
 ```
 **config.yaml**
-[여기](https://github.com/boostcampaitech7/level2-nlp-generationfornlp-nlp-05-lv3/blob/main/config/config.yaml)에서 확인
+[github](https://github.com/boostcampaitech7/level2-nlp-generationfornlp-nlp-05-lv3/blob/main/config/config.yaml)에서 확인
 
 <br>
 
