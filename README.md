@@ -1,5 +1,7 @@
 # 🏆 LV.2 NLP 프로젝트 : 수능형 문제 풀이 모델 생성
 
+<br><br>
+
 ## ✏️ 대회 소개
 
 | 특징     | 설명 |
@@ -10,12 +12,7 @@
 | 평가 지표 | 모델이 맞춘 문제 수를 전체 문제 수로 나눈 정확도(Accuracy)를 기준으로 합니다.|
 | 결과물 | [WrapUp Report](https://github.com/boostcampaitech7/level2-nlp-generationfornlp-nlp-05-lv3/blob/main/assets/NLP%E1%84%80%E1%85%B5%E1%84%8E%E1%85%A9%E1%84%83%E1%85%A2%E1%84%92%E1%85%AC_NLP_%E1%84%90%E1%85%B5%E1%86%B7%20%E1%84%85%E1%85%B5%E1%84%91%E1%85%A9%E1%84%90%E1%85%B3(05%E1%84%8C%E1%85%A9).pdf), [Presentation Material](https://github.com/boostcampaitech7/level2-nlp-generationfornlp-nlp-05-lv3/blob/main/assets/%5B5%E1%84%8C%E1%85%A9%5DLv2_%E1%84%89%E1%85%AE%E1%84%82%E1%85%B3%E1%86%BC%E1%84%86%E1%85%AE%E1%86%AB%E1%84%8C%E1%85%A6%E1%84%91%E1%85%AE%E1%86%AF%E1%84%8B%E1%85%B5_%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%84%8C%E1%85%A6%E1%86%A8%E1%84%90%E1%85%B3_%E1%84%87%E1%85%A1%E1%86%AF%E1%84%91%E1%85%AD%E1%84%8C%E1%85%A1%E1%84%85%E1%85%AD.pdf) |
 
-## 📃 KSAT Results
-
-본 프로젝트에서 개발한 sLLM을 활용한 2025학년도 수능의 국어(화법과 작문), 한국사, 사회 탐구 영역 풀이 결과입니다.
-
-![image](https://github.com/user-attachments/assets/ca280ffb-8598-4112-81f6-8f5fd04fb4dd)
-
+<br><br>
 
 ## 🎖️ Leader Board
 
@@ -25,12 +22,11 @@
 
 ![image](https://github.com/user-attachments/assets/778831bc-2ed6-4090-a1a0-49ce38c71bc6)
 
-
 ### 🥇 Private Leader Board (1위)
 
 ![image](https://github.com/user-attachments/assets/8757896e-8e93-4bb2-9798-14bf764259ae)
 
-
+<br><br>
 
 ## 👨‍💻 나야, 자, 연어팀 멤버
 <div align='center'>
@@ -41,7 +37,7 @@
 
 </div>
 
-
+<br><br>
 
 ## 👼 역할 분담
 
@@ -58,6 +54,8 @@
 
 </div>
 
+<br><br>
+
 ## 🏃 프로젝트 설명
 
 ### 🖥️ 프로젝트 개요
@@ -70,11 +68,15 @@
 | 개발 환경 | `GPU` : Tesla V100 Server 4대, `IDE` : VsCode, Jupyter Notebook |
 | 협업 환경 | Jira&Confluence(진행 상황 공유), Github(코드 및 데이터 공유), Zoom&Slack(실시간 소통) |
 
+<br>
+
 ### 📅 프로젝트 타임라인
 
 - 프로젝트는 2024-11-11 ~ 2024-11-28까지 진행되었습니다.
 
 (이미지)
+
+<br>
 
 ### 🕵️ 프로젝트 진행
 
@@ -86,6 +88,8 @@
 | 모델링 | 모델 선정 및 튜닝, LoRA 튜닝, 프롬프트 튜닝 |
 | RAG | Vector Store 구축, Retriever 평가용 데이터셋 구축, Retriever 파라미터 설정, RAFT(Retrieval Augmented Fine-Tuning) |
 | 앙상블 | Weighted Voting Ensemble |
+
+<br>
 
 ### 🤖 Ensemble
 
@@ -99,11 +103,21 @@
 | Top 2 | 0.8272 | 0.2 |
 | Top 1 | 0.8295 | 0.4 |
 
+<br>
+
+### 📃 KSAT Results
+
+본 프로젝트에서 개발한 sLLM을 활용한 2025학년도 수능의 국어(화법과 작문), 한국사, 사회 탐구 영역 풀이 결과입니다.
+
+![image](https://github.com/user-attachments/assets/ca280ffb-8598-4112-81f6-8f5fd04fb4dd)
+
+<br><br>
 
 ## 🎥 2025학년도 수능 문제 풀이 데모 영상
 
 https://github.com/user-attachments/assets/4448f058-6571-4037-9fb9-dfd8f86d5291
 
+<br><br>
 
 ## 📁 프로젝트 구조
 
@@ -138,6 +152,8 @@ level2-nlp-generationfornlp-nlp-05-lv3/
 
 ```
 
+<br>
+
 ### 💾 프로젝트 설치 및 실행
 
 - OS: Ubuntu-20.04.6 LTS
@@ -152,10 +168,10 @@ pip install -r requirements.txt
 python src/retrieval_dense.py # 혹은 python src/retrieval_sparse.py
 python main.py --config {config_path} --mode {train/test}
 ```
-
 **config.yaml**
-
 [여기](https://github.com/boostcampaitech7/level2-nlp-generationfornlp-nlp-05-lv3/blob/main/config/config.yaml)에서 확인
+
+<br>
 
 **Demo 사용법**
 
