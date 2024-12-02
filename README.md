@@ -173,7 +173,7 @@ python main.py --config {config_path} --mode {train/test}
 
 <br>
 
-**Demo 사용법**
+### 💾 Demo 실행
 
 ```bash
 cd streamlit
