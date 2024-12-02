@@ -8,7 +8,7 @@
 | 대회 설명 | AI 모델로 한국어 수능 국어 및 사회 과목의 문제를 풀어 대형 언어 모델들을 능가하는 성능을 목표로 하는 대회입니다. |
 | 데이터 구성 | 데이터는 수능 국어·사회와 유사한 문제를 기반으로 KMMLU(한국사), MMMLU(고교 역사·경제·정치 등), KLUE MRC(경제·국제·사회 등) 데이터를 포함합니다. |
 | 평가 지표 | 모델이 맞춘 문제 수를 전체 문제 수로 나눈 정확도(Accuracy)를 기준으로 합니다.|
-| 결과물 | WrapUp Report |
+| 결과물 | [WrapUp Report](https://github.com/boostcampaitech7/level2-nlp-generationfornlp-nlp-05-lv3/blob/main/assets/NLP%E1%84%80%E1%85%B5%E1%84%8E%E1%85%A9%E1%84%83%E1%85%A2%E1%84%92%E1%85%AC_NLP_%E1%84%90%E1%85%B5%E1%86%B7%20%E1%84%85%E1%85%B5%E1%84%91%E1%85%A9%E1%84%90%E1%85%B3(05%E1%84%8C%E1%85%A9).pdf), [Presentation Material](https://github.com/boostcampaitech7/level2-nlp-generationfornlp-nlp-05-lv3/blob/main/assets/%5B5%E1%84%8C%E1%85%A9%5DLv2_%E1%84%89%E1%85%AE%E1%84%82%E1%85%B3%E1%86%BC%E1%84%86%E1%85%AE%E1%86%AB%E1%84%8C%E1%85%A6%E1%84%91%E1%85%AE%E1%86%AF%E1%84%8B%E1%85%B5_%E1%84%91%E1%85%B3%E1%84%85%E1%85%A9%E1%84%8C%E1%85%A6%E1%86%A8%E1%84%90%E1%85%B3_%E1%84%87%E1%85%A1%E1%86%AF%E1%84%91%E1%85%AD%E1%84%8C%E1%85%A1%E1%84%85%E1%85%AD.pdf) |
 
 ## 🎖️ Leader Board
 
@@ -16,11 +16,13 @@
 
 ### 🥇 Public Leader Board (1위)
 
-(이미지)
+![image](https://github.com/user-attachments/assets/778831bc-2ed6-4090-a1a0-49ce38c71bc6)
+
 
 ### 🥇 Private Leader Board (1위)
 
-(이미지)
+![image](https://github.com/user-attachments/assets/8757896e-8e93-4bb2-9798-14bf764259ae)
+
 
 
 ## 👨‍💻 나야, 자, 연어팀 멤버
@@ -49,7 +51,7 @@
 
 </div>
 
-## 🏃 프로젝트
+## 🏃 프로젝트 설명
 
 ### 🖥️ 프로젝트 개요
 
@@ -58,7 +60,7 @@
 | 주제 | Generation for NLP - 수능형 문제 풀이 모델 생성 |
 | 구조 | LLM Fine-Tuned Foundation Model + RAG |
 | 평가 지표 | Accuracy = correct / total |
-| 개발 환경 | `GPU` : Tesla V100 Server 4대, `IDE` : Vscode, Jupyter Notebook |
+| 개발 환경 | `GPU` : Tesla V100 Server 4대, `IDE` : VsCode, Jupyter Notebook |
 | 협업 환경 | Jira&Confluence(진행 상황 공유), Github(코드 및 데이터 공유), Zoom&Slack(실시간 소통) |
 
 ### 📅 프로젝트 타임라인
@@ -94,13 +96,65 @@
 
 본 프로젝트에서 개발한 sLLM을 활용한 2025학년도 수능의 국어(화법과 작문), 한국사, 사회 탐구 영역 풀이 결과입니다.
 
-(이미지)
+![image](https://github.com/user-attachments/assets/ca280ffb-8598-4112-81f6-8f5fd04fb4dd)
 
 
-## 🎥 데모 영상
+
+## 🎥 2025학년도 수능 문제 풀이 데모 영상
 
 https://github.com/user-attachments/assets/4448f058-6571-4037-9fb9-dfd8f86d5291
 
 ## 📁 프로젝트 구조
 
 프로젝트 폴더 구조는 다음과 같습니다.
+
+```
+level2-nlp-generationfornlp-nlp-05-lv3/  
+├── checkpoints/                        # 모델 체크포인트 저장 폴더  
+│   └── (experiment_name)/              # 실험 이름  
+│       ├── checkpoint-1111             # 모델 체크포인트  
+│       └── checkpoint-2222  
+├── config/  
+│   └── config.yaml                     # 설정 관리 파일  
+├── notebooks/  
+│   ├── eda.ipynb                       # EDA  
+│   ├── demo_data_preprocessing.ipynb   # 데모 데이터 전처리 코드  
+│   └── ft_data_processing.ipynb        # Fine Tuning 데이터 전처리 코드   
+├── prompt/  
+│   ├── prompt_templates.yaml           # 프롬프트 템플릿 관리 파일  
+├── src/  
+│   ├── dataset.py                      # 데이터 로드 및 전처리 관련 코드  
+│   ├── ensemble.py                     # 앙상블 기법 구현 코드  
+│   ├── model.py                        # 모델 정의 및 학습 관련 코드  
+│   ├── retrieval_dense.py              # Dense Retrieval 구현 코드  
+│   ├── retrieval_sparse.py             # Sparse Retrieval 구현 코드  
+│   └── utils.py                        # 보조 함수 및 유틸리티 코드  
+├── streamlit/                          # Streamlit 관련 웹 애플리케이션 디렉토리  
+├── main.py                             # 프로젝트 실행의 메인 스크립트  
+├── .gitignore  
+├── README.md  
+└── requirements.txt  
+
+```
+
+### 💾 Installation
+
+```bash
+git clone https://github.com/boostcampaitech7/level2-nlp-generationfornlp-nlp-05-lv3.git
+pip install -r requirements.txt
+python main.py --config {config_path} --mode {train/test}
+```
+
+- **`config`**: config.yaml의 경로(폴더 경로 말고 .yaml의 경로!)
+- **`mode`**: train, test 중 선택
+
+**config.yaml**
+
+[여기](https://www.notion.so/jinjae/config/config.yaml)에서 확인
+
+**Demo 사용법**
+
+```bash
+cd streamlit
+streamlit run home.py
+```
