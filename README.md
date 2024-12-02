@@ -119,7 +119,7 @@ level2-nlp-generationfornlp-nlp-05-lv3/
 ├── notebooks/  
 │   ├── eda.ipynb                       # EDA  
 │   ├── demo_data_preprocessing.ipynb   # 데모 데이터 전처리 코드  
-│   └── ft_data_processing.ipynb        # Fine Tuning 데이터 전처리 코드   
+│   └── ft_data_processing.ipynb        # Fine-Tuning 데이터 전처리 코드   
 ├── prompt/  
 │   ├── prompt_templates.yaml           # 프롬프트 템플릿 관리 파일  
 ├── src/  
