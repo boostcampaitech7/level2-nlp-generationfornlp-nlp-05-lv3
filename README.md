@@ -137,16 +137,20 @@ level2-nlp-generationfornlp-nlp-05-lv3/
 
 ```
 
-### 💾 Installation
+### 💾 프로젝트 설치 및 실행
+
+- OS: Ubuntu-20.04.6 LTS
+- Python: 3.11 이상
+- 필수 라이브러리: `requirements.txt` 참고
+- **GPU**: NVIDIA V100 32GB
 
 ```bash
 git clone https://github.com/boostcampaitech7/level2-nlp-generationfornlp-nlp-05-lv3.git
 pip install -r requirements.txt
+
+python src/retrieval_dense.py # 혹은 python src/retrieval_sparse.py
 python main.py --config {config_path} --mode {train/test}
 ```
-
-- **`config`**: config.yaml의 경로(폴더 경로 말고 .yaml의 경로!)
-- **`mode`**: train, test 중 선택
 
 **config.yaml**
 
