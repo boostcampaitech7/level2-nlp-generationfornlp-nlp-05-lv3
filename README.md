@@ -1,3 +1,4 @@
+![GIFMaker_me (1)](https://github.com/user-attachments/assets/d7a01735-9089-4abd-9d17-17154a5a872c)
 
 ![GIFMaker_me](https://github.com/user-attachments/assets/e35bf18d-9b2f-4b40-bfd5-ee3cbe9693ef)
 
