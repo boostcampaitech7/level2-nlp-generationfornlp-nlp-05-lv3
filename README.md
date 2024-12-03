@@ -147,7 +147,8 @@ level2-nlp-generationfornlp-nlp-05-lv3/
 ├── src/  
 │   ├── dataset.py                      # 데이터 로드 및 전처리 관련 코드  
 │   ├── ensemble.py                     # 앙상블 기법 구현 코드  
-│   ├── model.py                        # 모델 정의 및 학습 관련 코드  
+│   ├── model.py                        # 모델 정의 및 학습 관련 코드
+│   ├── preprocessing.py                # 벡터 스토어 구축용 데이터 수집 및 전처리 코드
 │   ├── retrieval_dense.py              # Dense Retrieval 구현 코드  
 │   ├── retrieval_sparse.py             # Sparse Retrieval 구현 코드  
 │   └── utils.py                        # 보조 함수 및 유틸리티 코드  
