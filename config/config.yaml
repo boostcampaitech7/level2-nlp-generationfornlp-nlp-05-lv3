@@ -1,0 +1,61 @@
+model:
+  experiment_name: &experiment_name "Experiment_Sample" # Define common experiment name
+  train:
+    train_model_name: "unsloth/Qwen2.5-32B-Instruct-bnb-4bit" # Model name for training
+    train_csv_path: "data/rag_results/train_rag_rerank3_v2_list.csv"  # Path to train CSV file
+    train_checkpoint_path: "checkpoints/{experiment_name}" # Path to save training checkpoints
+  test:
+    test_checkpoint_path: "checkpoints/{experiment_name}/checkpoint-298" # Path to inference checkpoint
+    test_csv_path: "data/rag_results/test_rag_rerank3_v2_list.csv"  # Path to test CSV file
+    test_output_csv_path: "data/outputs/{experiment_name}.csv"  # Path for leaderboard submission CSV file
+
+  max_seq_length: 4096  # Maximum sequence length for the model
+  prompt_name: "BASE_PROMPT"  # Name of the prompt template in the prompt file
+  rag: True  # Enable retrieval-augmented generation
+  uniform_answer_distribution: True  # Ensure uniform answer distribution
+  train_valid_split: True  # If True, split train and validation datasets (0.9/0.1)
+
+seed: 3407  # Seed for reproducibility
+
+FastLanguageModel:
+  # model_name -> Set to 'train_model_name'
+  # max_seq_length -> Set to 'max_seq_length'
+  # dtype -> Hardcoded to None
+  # load_in_4bit -> Hardcoded to True
+
+peft:
+  # model_name -> Set to 'train_model_name'
+  r: 64
+  lora_alpha: 32
+  lora_dropout: 0
+  target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj",]
+  bias: "none"
+  use_gradient_checkpointing: "unsloth"
+  # random_state -> Set to 'seed'
+  use_rslora: True
+  # loftq_config -> Hardcoded to None
+
+UnslothTrainingArguments:
+  # do_train -> Hardcoded to True
+  # do_eval -> Automatically set based on 'train_valid_split'
+  per_device_train_batch_size: 2
+  per_device_eval_batch_size: 2
+  gradient_accumulation_steps: 8
+  warmup_ratio: 0.1
+  num_train_epochs: 2
+  learning_rate: 5e-5
+  embedding_learning_rate: 1e-6
+  # fp16 -> Hardcoded to not is_bfloat16_supported()
+  # bf16 -> Hardcoded to is_bfloat16_supported()
+  # logging_steps -> Hardcoded to 1
+  optim: "adamw_8bit"
+  weight_decay: 0.01
+  lr_scheduler_type: "linear"
+  # seed -> Set to 'seed'
+  # max_seq_length -> Set to 'max_seq_length'
+  # output_dir -> Set to 'train_checkpoint_path'
+  save_strategy: "epoch"
+  # eval_strategy: "no" -> Automatically set based on 'do_eval'
+  save_total_limit: 2
+  save_only_model: True
+  # report_to -> Hardcoded to 'wandb'
